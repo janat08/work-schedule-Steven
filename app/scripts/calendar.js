@@ -1,15 +1,15 @@
+function calendar(data) {
 
-  function calendar(data){
-
-    return w(data, ":calendar")`
+  //TODO s.currentWeek == to i+1 rather than 1
+  return w(data, ":calendar")`
         <div class="calendar container-fluid">
         <div class="month page-header calendar">
-          <h3> Schedule ${s.todos}</h3>
+          <h3> Schedule</h3>
           <ul class="pager">
             <li>
               <a href="#">Previous</a>
             </li>
-            <span> month</span>
+            <span> ${s.calendarTitle}</span>
             <li>
               <a href="#">Next</a>
             </li>
@@ -17,16 +17,13 @@
         </div>
         <div class="calendar heading row">
           <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" class="active">
-              <a href="#">Home</a>
-            </li>
-            <li role="presentation">
-              <a href="#">Profile</a>
-            </li>
-            <li role="presentation">
-              <a href="#">Messages</a>
-            </li>
-          </ul>
+          ${s.weekPeriods.map((x, i) => {
+    return w(x)`<li role="presentation" class=${i == s.currentWeek ? "active" : ""}>
+        <a >${"WEEK " + (i + 1)}</a>
+        </li>`
+
+  })
+    }
     
         </div>
         <div class="calendar body">
@@ -35,23 +32,23 @@
               <th>
                 Users
               </th>
-              <th>
-                days of week/dates
-              </th>
+              ${
+                s.calendarWeek.map((x)=>{
+                  return w(x, ":cBody")`
+                    <th>
+                    ${x.date}<br/>
+                    ${x.day}
+                    </th>
+                  `
+                })
+    }
             </tr>
-            <tr>
-              <th>asdf</th>
-              <th>asdf</th>
-            </tr>
-            <tr>
-              <td>sdf</td>
-              <td>sdf</td>
-            </tr>
-            <tr>
-              <td>sdf</td>
-              <td>sdf</td>
-            </tr>
+            ${
+              s.users.map((x,i)=>{
+                return w(x)`${calendarItem(x, i)}`
+              })
+    }
           </table>
         </div>
       </div>`
-      }
+}

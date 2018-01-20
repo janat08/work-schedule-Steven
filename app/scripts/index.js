@@ -6,8 +6,6 @@ w= wire
 function root() {
     hyperHTML(document.getElementById('root'))`
       <div>
-        <h1>Hello, world!</h1>
-        <h2>It is ${s.todos}.</h2>
         ${calendar()}
         ${storeHours()}
       </div>
