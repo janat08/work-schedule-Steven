@@ -1,24 +1,36 @@
 function calendar(data) {
 
+  function previous(){
+  return a.previous()
+  }
+  function next (){
+  return a.next()
+  }
+
+
+
   //TODO s.currentWeek == to i+1 rather than 1
   return w(data, ":calendar")`
         <div class="calendar container-fluid">
         <div class="month page-header calendar">
           <h3> Schedule</h3>
           <ul class="pager">
-            <li>
-              <a href="#">Previous</a>
+            <li onclick=${previous}>
+              <a>Previous</a>
             </li>
             <span> ${s.calendarTitle}</span>
-            <li>
-              <a href="#">Next</a>
+            <li onclick=${next}>
+              <a >Next</a>
             </li>
           </ul>
         </div>
         <div class="calendar heading row">
           <ul class="nav nav-tabs nav-justified">
           ${s.weekPeriods.map((x, i) => {
-    return w(x)`<li role="presentation" class=${i == s.currentWeek ? "active" : ""}>
+    function switchWeek(){
+      return a.switchWeek(i)
+    }
+    return w(x)`<li role="presentation" onclick=${switchWeek} class=${i == s.currentWeek ? "active" : ""}>
         <a >${"WEEK " + (i + 1)}</a>
         </li>`
 

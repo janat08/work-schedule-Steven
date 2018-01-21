@@ -10,7 +10,7 @@ function storeHours() {
         <th>deactivate</th>
       </tr>
   ${
-  s.dayPeriods.map((time, i)=>{
+  s.dayPeriods.map((time, i)=>{ //intentional periods
     return w(time, ":storeItem")`${storeItem(time, i)}`
     })
     }  

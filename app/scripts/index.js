@@ -3,11 +3,14 @@ const {hyper, wire} = hyperHTML
 const hyperhtml = hyperHTML,
 w= wire
 
+//Use @observer on all components that render @observables
+//https://mobx.js.org/best/pitfalls.html
 function root() {
     hyperHTML(document.getElementById('root'))`
       <div>
         ${calendar()}
         ${storeHours()}
+        ${forms()}
       </div>
     `
   }

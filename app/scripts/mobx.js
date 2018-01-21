@@ -12,21 +12,23 @@ var Store = observable({
     curR: DT.local(), //currentReference,
   //schema: times:  [paired values]
     users: [{name: "name", times: this.dayPeriods}],
-    // times:  [{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false},{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false},{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false},{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false},{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false},{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false},{"start":"2018-01-19T09:00:00.000+06:00","end":"2018-01-19T18:00:00.000+06:00","disabled":false}],
+    times:  [[1515952800000,1516039199999],[1516039200000,1516125599999],[1516125600000,1516211999999],[1516212000000,1516298399999],[1516298400000,1516384799999],[1516384800000,1516471199999],[1516471200000,1516557599999]],
 
   //storeHours, with optional disabled:true prop
-    times: [],
+  //   times: [],
     config: {sliderInt: 15},
+    selectedUser: 0,
 
     /* a derived value */
     get conf(){
       return {sI: Dur.fromObject({minutes: this.config.sliderInt})}
     },
   get curRMonthYear(){
+    console.log("curR triggers")
       return {year: this.curR.year, month: this.curR.month}
   },
     get weekSpan(){ //span of month across weeks
-      var first,last, months, weeks, curr = this.curRMonthYear
+      var first,last, months, weeks, curr = this.curR
         first = DT.fromObject({year: curr.year, month: curr.month})
       first = first.plus({days: (7-first.weekday)-6})
       last = DT.fromObject({year: curr.year, month: curr.month+1}).minus({minute:1})
@@ -71,7 +73,6 @@ var Store = observable({
         return x
       })
       res.pop()
-      this.times=res
       return res
     },
     get currentWeek(){ //returns index of week
@@ -95,68 +96,74 @@ var Store = observable({
    get calendarTitle(){ //Formatting title -localized
         return this.curR.toFormat("LLL yyyy").toUpperCase()
    },
-  get storeHours(){ //format store hours -localized
-      return this.times.map(x=>{
-        return x.map(y=>{
-          return y.toFormat("t")
-        })
+  get initializedHours(){ //turn to dates from ms
+    this.times.map(x=>{
+      return x.map(x=>{
+        return DT.fromJSDate(new Date(x))
       })
+    })
   },
-
-  //TODO change dayPeriods to user generated values
-  get sortUsers(){ //by starting dates
-    var self = this
-      return this.users.map(x=>{
-        x.times = mobx.toJS(self.dayPeriods)
-        x.times.sort((x,y)=>x[0]-y[0])
-
-        return x
-      })
-  },
-  //if you decide to prefetch, it may be appropriate to introduce intermediary step
-  //that splices sort users, and the proceeds to map in another computation
-  //TODO map over store hours for weekdays
-  get mapUsers(){
-      return this.sortUsers.map(x=>{
-        var ind = 0
-        var res, uI //userIndex
-        x.weekDays = x.times.map((y,i, ar)=>{
-          if (i == 0){
-            var {ind, rest, uI} = arrangeUsers(0, 0, x, ar)
-          }
-          if (ind == i){
-            y.status = res
-            y.userIndex = uI
-            var {ind, res, uI} = arrangeUsers(i+1, uI+1, x, ar)
-          } else {
-            y.status = "none"
-          }
-          if (i == 0){
-            y.status = "none"
-            console.log(ind, i, res)
-          }
-          return y
-        })
-      return x
-      })
+  // get storeHours(){ //format store hours -localized
+  //     return this.initializedHours.map(x=>{
+  //       return x.map(y=>{
+  //         return y.toFormat("t")
+  //       })
+  //     })
+  // },
+  //
+  // //TODO sort user generated values
+  // get sortUsers(){ //by starting dates
+  //   var self = this
+  //     return this.users.map(x=>{
+  //       x.times = mobx.toJS(self.dayPeriods)
+  //       x.times.sort((x,y)=>x[0]-y[0])
+  //
+  //       return x
+  //     })
+  // },
+  // //if you decide to prefetch, it may be appropriate to introduce intermediary step
+  // //that splices sort users, and the proceeds to map in another computation
+  // //TODO map over store hours for weekdays
+  // get mapUsers(){
+  //     var self = this
+  //     return this.sortUsers.map(x=>{
+  //       var ind = 0
+  //       var res, uI //userIndex
+  //       x.weekDays = x.times.map((y,i, ar)=>{
+  //
+  //         if (i == 0){
+  //           var a = arrangeUsers(0, 0, x, ar)
+  //           ind = a.ind
+  //           res = a.res
+  //           uI = a.uI
+  //         }
+  //         if (ind == i){
+  //           y.status = res
+  //           y.userIndex = uI
+  //           var a = arrangeUsers(i+1, uI+1, x, ar)
+  //           ind = a.ind
+  //           res = a.res
+  //           uI = a.uI
+  //           // console.log(ind, i, res)
+  //
+  //         } else {
+  //           y.status = "none"
+  //         }
+  //         return y
+  //       })
+  //     return x
+  //     })
+  // },
+  get disabledDays(){
+      return this.dayPeriods.map((x,i)=>{x.ind = i; return x}).filter(x=>x.disabled).reduce((a, x)=>{a[x.ind]=true;return a}, {})
   }
 });
 
 var s = Store
 
-a = {
-  changeWeek(offset){
-    var sign = Math.sign(offset)==1
-    s.curV
-  },
-  changeSlider(ui, ind, event){
 
-    _.debounce(POST(), 500)
-  }
-}
 //pairs some schema index to non-empty value; helps record empty values
 function arrangeUsers(i, uI, x, arr){
-  var userIndex
   for (i; i<arr.length; i++){
     if (x.times[uI][0] >= arr[i][0] && x.times[uI][1] <= arr[i][1]){
       if (x.times[uI][0] == arr[i][0] && x.times[uI][1] == arr[i][1]){
@@ -172,23 +179,13 @@ function arrangeUsers(i, uI, x, arr){
 function POST(){}
 /* a function that observes the state */
 //fixtures
-
-    // if(!s.times.length){
-    //   for(var d = 0; d < 7; d++) {
-    //     s.times.push({start: DT.fromObject({hours: 9}), end: DT.fromObject({hours: 18})})
-    //   }
-    //
-    // }
-    //
-    // console.log(s.timesC[3].min.toJSDate().getTime().toString(), s.timesC[3].max.toString())
-
-/////////////////////////////////////////
 /*
-var first,last, months, weeks, curr = luxon.DateTime.local() , DT = luxon.DateTime, Dur = luxon.Duration
-  first = DT.fromObject({year: curr.year, month: curr.month})
-      first = first.plus({days: (7-first.weekday)-6})
-      last = DT.fromObject({year: curr.year, month: curr.month+1}).minus({minute:1})
-      last = last.plus({days: (7-last.weekday)})
+Generate times for given week
+var a = s.dayPeriods.map(x=>{
+  return x.map(x=>{
+    return x.ts
+  })
+})
 */
-
+/////////////////////////////////////////
 // {user: "name", date: [1517680800000, 1517767199999]}
