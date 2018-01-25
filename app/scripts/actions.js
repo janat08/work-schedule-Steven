@@ -1,42 +1,51 @@
 var extendObservable = mobx.extendObservable
+var action = mobx.action
 a = {
-  selectUser(i){
-    console.log("fired")
-    console.log(i)
+  selectUser: action((i)=>{
     s.selectedUser = i
-  },
-  switchWeek(i){
-    console.log(i)
+  }),
+  switchWeek: action((i)=>{
     var ref = s.curR
     var val = s.weekPeriods[i]
     var res = {curR: val[0].month == ref.month? val[0]: val[1]}
-    console.log(val, val[0].month == ref.month? val[0]: val[1])
-    // obser(curR, val[0].month == ref.month? val[0]: val[1])
-    extendObservable(s, res)
-  },
-  next(){
+    s.curR =  val[0].month == ref.month? val[0]: val[1]
+  }),
+  next: action((i)=>{
     var ref = s.curR
-    s.curR = DT.fromObject({month: ref.month+1})
-  },
-  previous(){
+    s.curR = DT.fromObject({year: ref.year, month: ref.month}).plus({month:1})
+  }),
+  previous: action((i)=>{
     var ref = s.curR
-    s.curR = DT.fromObject({month: ref.month}).minus({days:1})
-  },
-  toggleDay(x, i){
+    s.curR = DT.fromObject({year: ref.year, month: ref.month}).minus({days:1})
+  }),
+  toggleDay: action((y, i)=>{
     if (s.disabledDays[i]){
       return
     }
     var us = s.selectedUser
-    s.users[us].times[i] = s.times[i]
-  },
-  changeSlider(i){ //state is changed on input
-    var val = s.times[i]
-    _.debounce(POST(val), 500)
-  },
-  toggleDisable(i){
-    extendObservable(s.times[i], disabled)
-    s.times[i].disabled = !s.times[i].disabled
-  },
+    s.users[y].times[i] = s.times[i]
+  }),
+  changeSlider: action((val, i)=>{ //state is changed on input
+    s.debouncedTimes[i] = [val[0].ts, val[1].ts]
+    console.log("ACTION", s.debouncedTimes[i], [val[0].ts, val[1].ts])
+  }),
+  toggleDisable: action((i)=>{
+    // if(s.times[i].disabled == undefined){
+    // extendObservable(s.times[i].disabled, {disabled: true})
+    // }
+     extendObservable(s.disabled, {[i]: !s.disabled[i]})
+    // s.times[i].disabled = !s.times[i].disabled
+  }),
+  selectStart: action((x)=>{
+    s.users[s.selectedUser].times[s.selectedDay][0]= x.ts
+  }),
+  selectEnd: action((x)=>{
+    s.users[s.selectedUser].times[s.selectedDay][1]= x.ts
+  }),
+
+  selectDay: action((x)=>{
+    s.selectedDay = x
+  })
 
 }
 // autorun(()=>{
@@ -47,10 +56,4 @@ a = {
 //   //s.times = res.times
 // })
 autorun(()=>{
-  console.log("autorun", s.curRMonthYear)
 })
-
-function obser(target, date){
-  var a = extendObservable
-  a(s[target], date)
-}

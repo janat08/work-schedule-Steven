@@ -37,13 +37,8 @@
     <link rel="canonical" href="http://www.example.com/">
     -->
   <!-- ///////////////////////////////////////////////////////////////////////// -->
-  <link href="https://fonts.googleapis.com/css?family=Montserrat|Poppins" rel="stylesheet">
-  <script src="https://use.fontawesome.com/345f766e5e.js"></script>
-    <!-- slider -->
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
     crossorigin="anonymous">
@@ -55,12 +50,23 @@
     crossorigin="anonymous"></script>
 
 
+  <link href="https://fonts.googleapis.com/css?family=Montserrat|Poppins" rel="stylesheet">
+  <script src="https://use.fontawesome.com/345f766e5e.js"></script>
+  <!-- slider -->
+  <!--tried and failed-->
+  <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css">
+
+
   <link rel='stylesheet' href="styles/main.css">
-  <script src="http://moment.github.io/luxon/global/luxon.min.js"></script>
   <!-- necessery -->
-  <script src="https://unpkg.com/hyperhtml@2.4.3/min.js"></script>
-  <script src="https://npmcdn.com/mobx@2.2.0/lib/mobx.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+  <script src="http://moment.github.io/luxon/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hyperhtml@latest/min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hyper-element@latest/source/bundle.min.js"></script>
+  <script src="https://unpkg.com/mobx@3/lib/mobx.umd.js"></script>
 
 
 
@@ -68,8 +74,13 @@
 
 <body>
 
-  <div id="root"></div>
+<div class="slider">
 
+  <div class="slider slider-horizontal" id=""><div class="slider-track"><div class="slider-track-low" style="left: 0px; width: 17.7083%;"></div><div class="slider-selection" style="left: 17.7083%; width: 42.7083%;"></div><div class="slider-track-high" style="right: 0px; width: 39.5833%;"></div></div><div class="tooltip tooltip-main top hide" role="presentation" style="left: 39.0625%;"><div class="tooltip-arrow"></div><div class="tooltip-inner">17 : 58</div></div><div class="tooltip tooltip-min top hide" role="presentation" style="left: 17.7083%;"><div class="tooltip-arrow"></div><div class="tooltip-inner">17</div></div><div class="tooltip tooltip-max top hide" role="presentation" style="left: 60.4167%;"><div class="tooltip-arrow"></div><div class="tooltip-inner">58</div></div><div class="slider-handle min-slider-handle round" role="slider" aria-valuemin="0" aria-valuemax="96" aria-valuenow="17" tabindex="0" style="left: 17.7083%;"></div><div class="slider-handle max-slider-handle round" role="slider" aria-valuemin="0" aria-valuemax="96" aria-valuenow="58" tabindex="0" style="left: 60.4167%;"></div></div><input type="text" value="17,58" data-slider-min="0" data-slider-tooltip="hide" data-slider-step="1" class="slider-range0" data-slider-max="96" data-slider-value="[-17, 79]" data-value="17,58" style="display: none;">
+
+</div>
+
+  <div id="root"></div>
 
 
 
@@ -82,8 +93,6 @@
   <script src="scripts/actions.js"></script>
   <script src="scripts/calendar.js"></script>
   <script src="scripts/storeHours.js"></script>
-  <script src="scripts/storeItem.js"></script>
-  <script src="scripts/calendarItem.js"></script>
   <script src="scripts/forms.js"></script>
   <script src="scripts/index.js"></script>
 

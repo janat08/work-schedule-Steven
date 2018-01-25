@@ -3,25 +3,40 @@ const {hyper, wire} = hyperHTML
 const hyperhtml = hyperHTML,
 w= wire
 
+if(document.registerElement) {
+reg =document.registerElement
+} else {
+reg = window.customElements.define
+}
 //Use @observer on all components that render @observables
 //https://mobx.js.org/best/pitfalls.html
-function root() {
-    hyperHTML(document.getElementById('root'))`
+const root = {
+  data: {},
+   render() {
+     return hyperHTML(document.getElementById('root'))`
       <div>
-        ${calendar()}
-        ${storeHours()}
-        ${forms()}
+        <calendar-tag></calendar-tag>
+        <store-hours></store-hours>
+        <forms-tag></forms-tag>
       </div>
     `
-  }
+   }
+}
+
+document.registerElement("calendar-tag", calendar)
+document.registerElement("store-hours", storeHours)
+document.registerElement("forms-tag", forms)
+document.registerElement("slider-tag", slider)
 
 
-  autorun(()=>root(Store))
-  // wa(tick(timerData))
-  // setInterval(tick, 1000,
-  //   hyperHTML(document.getElementById('root'))
-  // );
-  // hyperHTML(document.getElementById('root'))
+au(()=>{
+ console.log("SUCCESS", s.users[0].name, Store.userCheck)
+})
+// ${storeHours()}
+// ${forms()}
+
+root.render()
+
 
 
 // @observer class Timer extends React.Component {
