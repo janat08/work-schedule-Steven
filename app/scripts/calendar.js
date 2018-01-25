@@ -55,7 +55,7 @@ class calendar extends hyperElement{
                     return a.selectDay(i)
                   }
                   return w(x, ":cBody")`
-                    <th class=${`${i==st.selectedDay?"active": ""}`} onclick=${selectDay}>
+                    <th class=${`${i==st.selectedDay?"info": ""}`} onclick=${selectDay}>
                     ${x.date}<br/>
                     ${x.day}
                     </th>

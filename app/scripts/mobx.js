@@ -12,50 +12,21 @@ var Int = luxon.Interval
 //fromPromise, initiate store with initial values
 var Store = observable({
   /* some observable state */
-  curR: DT.local().minus({days: 7}), //currentReference,
+  curR: DT.local(), //currentReference,
   //schema: times:  [paired values]
   selectedDay: 0,
   users: [{
     name: "name",
-    times: [
-      [1515952800000, 1516039199999],
-      [1516039200000, 1516125599999],
-      [1516125600000, 1516211999999],
-      [1516212000000, 1516298399999],
-      [1516298400000, 1516384799999],
-      [1516384800000, 1516471199999],
-      [1516471200000, 1516557599999]
-    ]
+    times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
+
   },{
     name: "asdfs",
-    times: [
-      [1515952800000, 1516039199999],
-      [1516039200000, 1516125599999],
-      [1516125600000, 1516211999999],
-      [1516212000000, 1516298399999],
-      [1516298400000, 1516384799999],
-      [1516384800000, 1516471199999],
-      [1516471200000, 1516557599999]
-    ]
+    times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
+
   }],
-  times: [
-    [1515952800000, 1516039200000],
-    [1516039200000, 1516125600000],
-    [1516125600000, 1516212000000],
-    [1516212000000, 1516298400000],
-    [1516298400000, 1516384800000],
-    [1516384800000, 1516471200000],
-    [1516471200000, 1516557600000]
-  ],
-  debouncedTimes: [
-    [1515952800000, 1516039200000],
-    [1516039200000, 1516125600000],
-    [1516125600000, 1516212000000],
-    [1516212000000, 1516298400000],
-    [1516298400000, 1516384800000],
-    [1516384800000, 1516471200000],
-    [1516471200000, 1516557600000]
-  ],
+  times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
+  ,
+
   disabled: {0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false},
 
   config: {
@@ -101,7 +72,7 @@ get conf(){
       if(i+1 == ar.length){
         return
       }
-      x=[x, ar[i+1]] //.minus({milliseconds: 1})
+      x=[x, ar[i+1].minus({milliseconds: 1})] //.minus({milliseconds: 1})
       return x
     })
     res.pop()
@@ -117,7 +88,7 @@ get conf(){
       if(i+1 == ar.length){
         return
       }
-      x=[x, ar[i+1]] //.minus({milliseconds: 1})
+      x=[x, ar[i+1].minus({milliseconds: 1})] //.minus({milliseconds: 1})
       return x
     })
     res.pop()
@@ -137,12 +108,12 @@ get conf(){
   get calendarWeek(){ //Formatting days -localized
     return this.dayPeriods.map(x=>{
       var ref = x[0]
-      x = {day: ref.toFormat('ccc').toUpperCase(), date: ref.toFormat("dd"), fullDay: ref.toFormat("cccc")}
+      x = {day: ref.toLocaleString({ weekday: 'short' }).toUpperCase(), date: ref.toLocaleString({ day: "2-digit" }), fullDay: ref.toLocaleString({ weekday: 'long' })}
       return x
     })
   },
   get calendarTitle(){ //Formatting title -localized
-      return this.curR.toFormat("LLL yyyy").toUpperCase()
+      return this.curR.toLocaleString({year: 'numeric', month: 'short'}).toUpperCase()
   },
   get initializedTimes(){ //turn to dates from ms
   return this.times.map(x=>{
@@ -154,7 +125,7 @@ get conf(){
   get storeHours(){ //format store hours -localized
     return this.initializedTimes.map(x=>{
       return x.map(y=>{
-        return y.toFormat("t")
+        return y.toLocaleString(DT.TIME_SIMPLE)
       })
     })
   },
@@ -213,7 +184,7 @@ get conf(){
   },
   get selectedEnd(){
     var st = s
-    var selectedStart = DT.fromMillis(st.mapUsers[st.selectedUser].times[st.selectedDay][1])
+    var selectedStart = DT.fromMillis(s.mapUsers[s.selectedUser].times[s.selectedDay][1])
     return selectedStart
   }
 
@@ -262,12 +233,6 @@ function makeFields (d){
 makeFields(setFields())
 mobx.reaction(setFields, makeFields , {delay: 100});
 
-mobx.reaction(() => {
-  console.log("debounced synced")
- return s.debouncedTimes.map(x=>x)
-},(de)=>{s.times = de;
-  console.log("synced", s.times.toJS(), s.debouncedTimes.toJS())
-}, {delay: 300});
 // mobx.autorunAsync(()=>{
 //   s.times = s.debouncedTimes.toJS()
 //   console.log("synced", s.times.toJS(), s.debouncedTimes.toJS())
@@ -281,11 +246,12 @@ mobx.reaction(() => {
     ///////////////////////////////////fixtures
     /*
     Generate times for given week
-    var a = s.dayPeriods.map(x=>{
+    var a = JSON.stringify(s.dayPeriods.map(x=>{
       return x.map(x=>{
         return x.ts
       })
     })
+    )
     */
     /////////////////////////////////////////
     // {user: "name", date: [1517680800000, 1517767199999]}

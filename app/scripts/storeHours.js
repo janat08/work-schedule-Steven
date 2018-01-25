@@ -1,147 +1,122 @@
 class storeHours extends hyperElement{
   setup(n){
-
     var a = au(n(s))
-    this.attrs = {
-0: [DT.fromMillis(s.debouncedTimes[0][0]),DT.fromMillis(s.debouncedTimes[0][1])],
-1: [DT.fromMillis(s.debouncedTimes[1][0]),DT.fromMillis(s.debouncedTimes[1][1])],
-2: [DT.fromMillis(s.debouncedTimes[2][0]),DT.fromMillis(s.debouncedTimes[2][1])],
-3: [DT.fromMillis(s.debouncedTimes[3][0]),DT.fromMillis(s.debouncedTimes[3][1])],
-4: [DT.fromMillis(s.debouncedTimes[4][0]),DT.fromMillis(s.debouncedTimes[4][1])],
-5: [DT.fromMillis(s.debouncedTimes[5][0]),DT.fromMillis(s.debouncedTimes[5][1])],
-6: [DT.fromMillis(s.debouncedTimes[6][0]),DT.fromMillis(s.debouncedTimes[6][1])],
+    this.attrs.over24Hours = false
+    var self = this
+
+      // setInterval(n(), 1000);
+
+    this.attrs.change24Hours = function (){
+      self.attrs.over24Hours = !self.attrs.over24Hours
+      return n().call()
     }
-
-
     return a
   }
-
   render(h, st){
-var self = this
-// console.log("before",this.attrs[0])
-// if(this.attrs[0] == undefined){
-//   this.attrs = {
-// 0: {0: st.storeHours[1][0], 1: st.storeHours[1][1]},
-// 1: {0: st.storeHours[1][0], 1: st.storeHours[1][1]},
-// 2: {0: st.storeHours[2][0], 1: st.storeHours[2][1]},
-// 3: {0: st.storeHours[3][0], 1: st.storeHours[3][1]},
-// 4: {0: st.storeHours[4][0], 1: st.storeHours[4][1]},
-// 5: {0: st.storeHours[5][0], 1: st.storeHours[5][1]},
-// 6: {0: st.storeHours[6][0], 1: st.storeHours[6][1]},
-// }
-// }
-// console.log(this.attrs[0], "post")
-console.log(self)
+var boilerplate = Array(24).fill(0,0,24).map((x,i)=>{if (i==0){return 12} else if (i>12){return i-12} else {return i}})
+
+    function minutes(edge){
+      return w()`
+      <div style=${{width: 200}}>
+      ${[0, 15, 30, 45].map((x, i) => {
+          function pick() {
+            return a.pick(st.initializedTimes[st.selectedDay][edge].set({minute: x}).ts, i, edge)
+          }
+
+          if (x == st.initializedTimes[st.selectedDay][edge].minute) {
+            var style = {color: "red"}
+          } else {
+            if(edge){
+              if (x < st.initializedTimes[st.selectedDay][1].minute) { //TODO end times are at 00, should be changed back
+                var style = {color: "orange"}
+              }
+            } else {
+              if (x > st.initializedTimes[st.selectedDay][0].minute) { //TODO end times are at 00, should be changed back
+                var style = {color: "orange"}
+              }
+            }
+          }
+
+
+          return w()`
+     <span style=${style}  class="time-selection__cell" onclick=${pick}>${x}</span>
+      `
+        })
+          }`
+    }
+
+    function hours(edge, toggle){
+      toggle = toggle? {days: 1}: undefined
+      return w()`
+      <div style=${{width: 200}}>
+      ${boilerplate.map((x, i) => {
+        function pick() {
+          return a.pick(st.dayPeriods[st.selectedDay][edge].set({hours: i, ...toggle}).ts, i, edge)
+        }
+
+        var style = {}
+        if (i == st.initializedTimes[st.selectedDay][0].hour || i == st.initializedTimes[st.selectedDay][1].hour) {
+          var style = {color: "red"}
+        } else if (i < st.initializedTimes[st.selectedDay][1].hour && i > st.initializedTimes[st.selectedDay][0].hour) { //TODO end times are at 00, should be changed back
+          var style = {color: "orange"}
+        }
+
+        var br
+        if ((i + 1) % 6 == 0) {
+          br = ['<br/>']
+        }
+
+        return w()`
+    <span onclick=${pick}  class="time-selection__cell" style=${style}>${x}</span> ${br}  
+    `
+      })
+    }`
+    }
+
   return h`
-
-
   <div class="hours">
     <h3>Store Hours</h3>
     <table class="table table-striped">
       <tr>
         <th>day</th>
-        <th>slide</th>
         <th>deactivate</th>
+        <th>slide</th>
       </tr>
   ${
   st.dayPeriods.map((item, i)=>{ //intentional periods
     function disable(){
       return a.toggleDisable(i)
     }
-    $(function() {
-      $(".slider-range" + i)
-      .slider({})
-      .on(
-        "slide", function (event) {
-          var val = event.value
-          a.changeSlider([self.attrs[i][0], self.attrs[i][1]], i)
-
-          if (val[0] == item[0]) {
-            self.attrs[i][1] = DT.fromMillis(val[1]*s.conf.sI.as("milliseconds")+item[0].ts)
-          } else {
-            self.attrs[i][0] = DT.fromMillis(val[0]*s.conf.sI.as("milliseconds")+item[0].ts)
-          }
-        },
-      )
-        .on(
-          "slideStart", function (event) {
-            var val = event.value
-            a.changeSlider([self.attrs[i][0], self.attrs[i][1]], i)
-
-            if (val[0] == item[0]) {
-              self.attrs[i][1] = DT.fromMillis(val[1]*s.conf.sI.as("milliseconds")+item[0].ts)
-            } else {
-              self.attrs[i][0] = DT.fromMillis(val[0]*s.conf.sI.as("milliseconds")+item[0].ts)
-            }
-          },
-        )
-        .on(
-          "slideStop", function (event) {
-            var val = event.value
-            a.changeSlider([self.attrs[i][0], self.attrs[i][1]], i)
-
-            if (val[0] == item[0]) {
-              self.attrs[i][1] = DT.fromMillis(val[1]*s.conf.sI.as("milliseconds")+item[0].ts)
-            } else {
-              self.attrs[i][0] = DT.fromMillis(val[0]*s.conf.sI.as("milliseconds")+item[0].ts)
-            }
-          },
-        )
-
-    })
-
-// console.log(self.attrs[i][0])
+    function selectDay(){
+      return a.selectDay(i)
+    }
     return w(item, ":storeItem")`
           <tr>
-      <td>${st.calendarWeek[i].fullDay}<br/> ${self.attrs[i][0].toFormat("t")}-${self.attrs[i][1].toFormat("t")}</td>
-        <td>
-          <div class="slider">
-
-          <input type="text" class=${"slider-range"+i} value="" data-slider-min="0" 
-          data-slider-tooltip="hide"
-          data-slider-max=${((item[1]).ts-(item[0]).ts)/s.conf.sI.as("milliseconds")} 
-data-slider-step="1" data-slider-value=${`[${(item[0].ts-self.attrs[i][0])/s.conf.sI.as("milliseconds")}, ${(self.attrs[i][1]-self.attrs[i][0])/s.conf.sI.as("milliseconds")}]`}/>
-    
-          </div>
-
-        </td>
-        <td onclick=${disable}>
-        ${this.attrs.val1}
-
+      <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : ""}`}>
+${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}</td>
+<td onclick=${disable}> 
 <i class="fa fa-times-circle fa-lg" aria-hidden="true" style=${{color: st.disabledDays[i] ? "red" : "grey"}}></i>
-
-
         </td>
       </tr>
-    
     `
     })
-    }  
-    
+    }
     </table>
-  </div>
+    
+    <h4>Pick Start</h4>
+    <h5>Hours</h5>
+    ${hours(0)}
+    <h5>Minutes</h5>
+    ${minutes(0)}
+    <h4>Pick End</h4>
+     ${hours(1)}
+    <h5>Minutes</h5>
+    ${minutes(1)}
+      </div>
 
 `
 }}
 
-
-class slider extends hyperElement{
-  setup(n){
-    console.log(this.dataset)
-
-
-    var a = au(n(s))
-    return a
-  }
-  connectedCallback() { console.log('rendering') }
-
-  render(h, st){
-    $(function(){$(".slider-range1").slider({})})
-    return h`
-    <input type="text"  data-init=true class=${"slider-range"+i} value="" data-slider-min=${(item[0]).ts} data-slider-max=${(item[1]).ts} 
-    data-slider-step="5" data-slider-value=${`[${st.times[i][0]},${st.times[i][1]}]`}/>
-`
-}}
 
 
 

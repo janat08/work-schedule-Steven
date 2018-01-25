@@ -23,11 +23,11 @@ a = {
       return
     }
     var us = s.selectedUser
-    s.users[y].times[i] = s.times[i]
+    s.users[y].times[i] = [s.initializedTimes[i][0].plus({}), s.initializedTimes[i][1].plus({})]
   }),
-  changeSlider: action((val, i)=>{ //state is changed on input
-    s.debouncedTimes[i] = [val[0].ts, val[1].ts]
-    console.log("ACTION", s.debouncedTimes[i], [val[0].ts, val[1].ts])
+  pick: action((val, i, edge)=>{ //state is changed on input
+    console.log()
+    s.times[s.selectedDay][edge] = val
   }),
   toggleDisable: action((i)=>{
     // if(s.times[i].disabled == undefined){

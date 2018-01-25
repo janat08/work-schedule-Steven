@@ -84,18 +84,17 @@
       
       ${st.users.map((x)=>{
       return w(x, ":debugging")`
-      user: ${x.weekDays.map((x,i)=>{
-        return w(x, ":sdf")`
-        Status ${i}: ${x.status} <br/>
-        `
-      })}<br/>
-      ${x.times.map((x,i)=>{
-      return w(x, ":sdff")`
-      ${new Date(x[0]).toTimeString().slice(0, 8)} --${new Date(x[1]).toTimeString().slice(0, 8)}<br/>
-      ${new Date(st.debouncedTimes[i][0]).toTimeString().slice(0, 8)} --${new Date(st.debouncedTimes[i][1]).toTimeString().slice(0, 8)}<br/>
+      user ${x.name}: ${x.weekDays.map((y,i)=>{
+        return w(y, ":sdf")`
+        Status ${i}: ${y.status} <br/>
+      ${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(x.times[i][0])).slice(2, -3)} --${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(x.times[i][1])).slice(2, -3)}<br/>
+      ${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(st.times[i][0])).slice(2, -3)} --${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(st.times[i][1])).slice(2, -3)}<br/>
       break <br/>
-      `
-      })
+`
+      })}<br/>
+
+
+
         })
       `
       })

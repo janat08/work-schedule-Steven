@@ -26,7 +26,6 @@ const root = {
 document.registerElement("calendar-tag", calendar)
 document.registerElement("store-hours", storeHours)
 document.registerElement("forms-tag", forms)
-document.registerElement("slider-tag", slider)
 
 
 au(()=>{
