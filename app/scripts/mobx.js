@@ -17,8 +17,8 @@ var Store = observable({
   selectedDay: 0,
   users: [{
     name: "name",
-    times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
-
+    times:  [["", ""],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
+//["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
   },{
     name: "asdfs",
     times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
@@ -30,7 +30,7 @@ var Store = observable({
   disabled: {0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false},
 
   config: {
-    sliderInt: 15 //forms, too
+    sliderInt: 30 //forms, too
   },
   selectedUser: 0,
   dailyTimes: [],
@@ -92,7 +92,7 @@ get conf(){
       return x
     })
     res.pop()
-    return res
+    return res.filter(x=>x[0].month == s.curR.month)
   },
   get currentWeek(){ //returns index of week
     var self = this
@@ -177,14 +177,21 @@ get conf(){
     return this.times.map((x,i)=>{x.ind = i; return x}).filter(x=>x.disabled).reduce((a, x)=>{a[x.ind]=true;return a}, {})
   },
 
-  get selectedStart(){
+  get selectedStart(){ //for User on day
     var st = s
-    var selectedStart = DT.fromMillis(st.mapUsers[st.selectedUser].times[st.selectedDay][0])
+    if (st.mapUsers[st.selectedUser].times[st.selectedDay][0]==""){
+      return "none"
+    } else {
+    var selectedStart = DT.fromMillis(st.mapUsers[st.selectedUser].times[st.selectedDay][0]).toLocaleString(DT.TIME_SIMPLE)
+    }
     return selectedStart
   },
-  get selectedEnd(){
+  get selectedEnd(){ //for User on day
     var st = s
-    var selectedStart = DT.fromMillis(s.mapUsers[s.selectedUser].times[s.selectedDay][1])
+    if (st.mapUsers[st.selectedUser].times[st.selectedDay][1] == ""){
+      return "none"
+    }
+    var selectedStart = DT.fromMillis(s.mapUsers[s.selectedUser].times[s.selectedDay][1]).toLocaleString(DT.TIME_SIMPLE)
     return selectedStart
   }
 
@@ -227,11 +234,11 @@ function makeFields (d){
   var interval = luxon.Interval.fromDateTimes(d.min, d.max),
   intervals = interval.splitBy(d.steps),
   res = intervals.map(x=>x.start)
-  res.push(d.max)
+  // res.push(d.max) anti-pattern, adds 59 minutes
   s.dailyTimes = res
 }
 makeFields(setFields())
-mobx.reaction(setFields, makeFields , {delay: 100});
+mobx.reaction(setFields, makeFields);
 
 // mobx.autorunAsync(()=>{
 //   s.times = s.debouncedTimes.toJS()

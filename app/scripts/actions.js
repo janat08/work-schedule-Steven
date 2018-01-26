@@ -22,13 +22,20 @@ a = {
     if (s.disabledDays[i]){
       return
     }
-    var us = s.selectedUser
-    s.users[y].times[i] = [s.initializedTimes[i][0].plus({}), s.initializedTimes[i][1].plus({})]
+    var time = s.users[y].times[i]
+    console.log(time, y, i)
+
+    var status = s.users[y].weekDays[i].status
+    if (status != "full"){
+      time.splice(0,2, s.initializedTimes[i][0].plus({}).ts, s.initializedTimes[i][1].plus({}).ts)
+    } else {
+      time.splice(0,2,"", "")
+    }
+    console.log(time)
   }),
-  pick: action((val, i, edge)=>{ //state is changed on input
-    console.log()
-    s.times[s.selectedDay][edge] = val
-  }),
+pick: action((val, i, edge)=>{ //state is changed on input
+  s.times[i][edge] = val
+}),
   toggleDisable: action((i)=>{
     // if(s.times[i].disabled == undefined){
     // extendObservable(s.times[i].disabled, {disabled: true})
@@ -36,12 +43,19 @@ a = {
      extendObservable(s.disabled, {[i]: !s.disabled[i]})
     // s.times[i].disabled = !s.times[i].disabled
   }),
-  selectStart: action((x)=>{
-    s.users[s.selectedUser].times[s.selectedDay][0]= x.ts
+  selectStart: action((x)=>{ //for user
+    if (s.users[s.selectedUser].times[s.selectedDay][0] == ""){
+      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, x.ts, s.dailyTimes[s.dailyTimes.length-1].plus({}).ts)
+    } else {
+      s.users[s.selectedUser].times[s.selectedDay][0]= x.ts
+    }
   }),
-  selectEnd: action((x)=>{
-    s.users[s.selectedUser].times[s.selectedDay][1]= x.ts
-  }),
+  selectEnd: action((x)=>{ //for user
+    if (s.users[s.selectedUser].times[s.selectedDay][1] == ""){
+      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, s.dailyTimes[0].plus({}).ts, x.ts)
+    } else {
+      s.users[s.selectedUser].times[s.selectedDay][1]= x.ts
+    }  }),
 
   selectDay: action((x)=>{
     s.selectedDay = x

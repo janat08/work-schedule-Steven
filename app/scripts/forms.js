@@ -47,8 +47,8 @@
       </div>
     <div class="dropdown">
     Start:
-      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        ${st.selectedStart.toFormat("t")}
+      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        ${st.selectedStart}
         <span class="caret"></span>
       </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -57,8 +57,8 @@
         function selectStart() {
           return a.selectStart(x)
         }
-      return w(x, ":dropdownUser")`
-            <li onclick=${selectStart}><a>${x.toFormat("t")}</a></li>
+      return w(x, ":userStart")`
+            <li onclick=${selectStart}><a>${x.toLocaleString(DT.TIME_SIMPLE)}</a></li>
             `
     })}
         </ul>
@@ -66,8 +66,8 @@
 
     <div class="dropdown">
         End
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-          ${st.selectedEnd.toFormat("t")}
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          ${st.selectedEnd}
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -75,30 +75,14 @@
             function selectEnd(){
               return a.selectEnd(x)
             }
-            return w(x, ":end")`
-            <li onclick=${selectEnd}><a>${x.toFormat("t")}</a></li>
+            return w(x, ":userEnd")`
+            <li onclick=${selectEnd}><a>${x.toLocaleString(DT.TIME_SIMPLE)}</a></li>
             `
     })}
         </ul>
       </div>
       
-      ${st.users.map((x)=>{
-      return w(x, ":debugging")`
-      user ${x.name}: ${x.weekDays.map((y,i)=>{
-        return w(y, ":sdf")`
-        Status ${i}: ${y.status} <br/>
-      ${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(x.times[i][0])).slice(2, -3)} --${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(x.times[i][1])).slice(2, -3)}<br/>
-      ${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(st.times[i][0])).slice(2, -3)} --${new Intl.DateTimeFormat("en-US",DT.DATETIME_SHORT).format(new Date(st.times[i][1])).slice(2, -3)}<br/>
-      break <br/>
-`
-      })}<br/>
 
-
-
-        })
-      `
-      })
-      }
   `
 }
   }
