@@ -16,7 +16,7 @@ class storeHours extends hyperElement{
         <th>times</th>
       </tr>
   ${
-  st.dayPeriods.map((item, i)=>{ //intentional periods
+  st.times.map((item, i)=>{ //intentional periods
     function disable(){
       return a.toggleDisable(i)
     }
@@ -57,7 +57,7 @@ class storeHours extends hyperElement{
 
     return w(item, ":storeItem")`
           <tr>
-      <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : ""}`}>
+      <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : (i >= st.badIndexes[0] && i <= st.badIndexes[1])? "warning": ""}`}>
 ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}</td>
 
 <td onclick=${disable}> 

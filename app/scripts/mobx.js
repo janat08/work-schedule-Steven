@@ -12,92 +12,175 @@ var Int = luxon.Interval
 //fromPromise, initiate store with initial values
 var Store = observable({
   /* some observable state */
-  curR: DT.local(), //currentReference,
+  curR: DT.local().plus({
+    day: 6
+  }), //currentReference,
   //schema: times:  [paired values]
-  selectedDay: 0,
   users: [{
     name: "name",
-    times:  [["", ""],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
-//["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
-  },{
+    times: [
+      ["", ""],
+      [1517162400000, 1517248799999],
+      [1517248800000, 1517335199999],
+      [1517335200000, 1517421599999]
+    ]
+
+    //["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
+  }, {
     name: "asdfs",
-    times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
+    times: [
+      [1517162400000, 1517248799999],
+      [1517248800000, 1517335199999],
+      [1517335200000, 1517421599999]
+    ]
 
   }],
-  times:  [[1516557600000,1516643999999],[1516644000000,1516730399999],[1516730400000,1516816799999],[1516816800000,1516903199999],[1516903200000,1516989599999],[1516989600000,1517075999999],[1517076000000,1517162399999]]
-  ,
+  times: [
+    [1517162400000, 1517248799999],
+    [1517248800000, 1517335199999],
+    [1517335200000, 1517421599999]
+  ],
 
-  disabled: {0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false},
+  disabled: {
+    0: false,
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+    5: false,
+    6: false
+  },
 
   config: {
     sliderInt: 30 //forms, too
   },
   selectedUser: 0,
   dailyTimes: [],
-  get sortUsers(){ //by starting dates
+  get sortUsers() { //by starting dates
     var self = this
-      return this.users.map(x=>{
-        x.times.sort((x,y)=>x[0]-y[0])
-        return x
+    return this.users.map(x => {
+      x.times.sort((x, y) => x[0] - y[0])
+      return x
+    })
+  },
+  /* a derived value */
+  get conf() {
+    return {
+      sI: Dur.fromObject({
+        minutes: this.config.sliderInt
       })
-    },
-/* a derived value */
-get conf(){
-    return {sI: Dur.fromObject({minutes: this.config.sliderInt})}
-  },
-  get curRMonthYear(){
-  console.log("curR triggers")
-    return {year: this.curR.year, month: this.curR.month}
-  },
-  get weekSpan(){ //span of month across weeks
-    var curr = this.curR,
-      first = DT.fromObject({year: curr.year, month: curr.month}),
-    first = first.plus({days: (7-first.weekday)-6}),
-    last = DT.fromObject({year: curr.year, month: curr.month}).minus({month: -1, millisecond:1}),
-    last = last.plus({days: (7-last.weekday)})
-    return {last, first}
-  },
-  get weeksNum(){ //weeks in the month (inclusive)
-    var last = this.weekSpan.last, first = this.weekSpan.first
-    var diff = last.diff(first, "days")
-    return Math.ceil(+diff.days)/7
-  },
-  get weekPeriods(){ //[start, end] times of weeks for current month
-    var first = this.weekSpan.first, num = this.weeksNum
-    var res = [first]
-    for (var i = 0; i < num; i++){
-      res.push(res[i].plus({days: 7}))
     }
-    res = res.map((x,i,ar)=>{
-      if(i+1 == ar.length){
+  },
+  get selectedDay() {
+    var st = s.badIndexes[0],
+      en = s.badIndexes[1],
+      res = this.curR.plus({
+        day: 6
+      }).weekday - 1
+    if (st == 0) {
+      return en + res
+    }
+    return this.curR.plus({
+      day: 6
+    }).weekday - 1
+  },
+  get badIndexes() { //from 0 index, inclusive
+    var map = s.queryPeriods,
+      len = map.length,
+      start = map[0].weekday - 1,
+      end = map[len - 1].weekday - 1
+    if (end != 6 || start != 0) {
+      if (start != 0) {
+        return [0, start - 1]
+      } else {
+        return [end + 1, 6]
+      }
+    } else {
+      return [8, 8]
+    }
+  },
+  set selectedDay(val) {
+    this.curR = val
+  },
+  get weekSpan() { //span of month across weeks
+    var curr = this.curR,
+      first = DT.fromObject({
+        year: curr.year,
+        month: curr.month
+      }),
+      first = first.plus({
+        days: (7 - first.weekday) - 6
+      }),
+      last = DT.fromObject({
+        year: curr.year,
+        month: curr.month
+      }).minus({
+        month: -1,
+        millisecond: 1
+      }),
+      last = last.plus({
+        days: (7 - last.weekday)
+      })
+    return {
+      last,
+      first
+    }
+  },
+  get weeksNum() { //weeks in the month (inclusive)
+    var last = this.weekSpan.last,
+      first = this.weekSpan.first
+    var diff = last.diff(first, "days")
+    return Math.ceil(+diff.days) / 7
+  },
+  get weekPeriods() { //[start, end] times of weeks for current month
+    var first = this.weekSpan.first,
+      num = this.weeksNum
+    var res = [first]
+    for (var i = 0; i < num; i++) {
+      res.push(res[i].plus({
+        days: 7
+      }))
+    }
+    res = res.map((x, i, ar) => {
+      if (i + 1 == ar.length) {
         return
       }
-      x=[x, ar[i+1].minus({milliseconds: 1})] //.minus({milliseconds: 1})
+      x = [x, ar[i + 1].minus({
+        milliseconds: 1
+      })] 
       return x
     })
     res.pop()
     return res
   },
-  get dayPeriods(){ //[start, end] times of day for current week
+  get dayPeriods() { //[start, end] times of day for current week
     var first = this.weekPeriods[this.currentWeek][0]
     var res = [first]
-    for (var i = 0; i < 7; i++){
-      res.push(res[i].plus({days: 1}))
+    for (var i = 0; i < 7; i++) {
+      res.push(res[i].plus({
+        days: 1
+      }))
     }
-    res = res.map((x,i,ar)=>{
-      if(i+1 == ar.length){
+    res = res.map((x, i, ar) => {
+      if (i + 1 == ar.length) {
         return
       }
-      x=[x, ar[i+1].minus({milliseconds: 1})] //.minus({milliseconds: 1})
+      x = [x, ar[i + 1].minus({
+        milliseconds: 1
+      })]
       return x
     })
     res.pop()
-    return res.filter(x=>x[0].month == s.curR.month)
+    return res
   },
-  get currentWeek(){ //returns index of week
+  get queryPeriods() {
+    return this.dayPeriods.map(x => x[0]).filter(x => x.month == s.curR.month)
+  },
+
+  get currentWeek() { //returns index of week
     var self = this
-    return this.weekPeriods.reduce(function(a, x, i){
-      if(x[0]<= self.curR && x[1] >= self.curR) {
+    return this.weekPeriods.reduce(function (a, x, i) {
+      if (x[0] <= self.curR && x[1] >= self.curR) {
         a = i
         return a
       } else {
@@ -105,59 +188,65 @@ get conf(){
       }
     }, 0)
   },
-  get calendarWeek(){ //Formatting days -localized
-    return this.dayPeriods.map(x=>{
+  get calendarWeek() { //Formatting days -localized
+    return this.dayPeriods.map(x => {
       var ref = x[0]
-      x = {day: ref.toLocaleString({ weekday: 'short' }).toUpperCase(), date: ref.toLocaleString({ day: "2-digit" }), fullDay: ref.toLocaleString({ weekday: 'long' })}
+      x = {
+        day: ref.toLocaleString({
+          weekday: 'short'
+        }).toUpperCase(),
+        date: ref.toLocaleString({
+          day: "2-digit"
+        }),
+        fullDay: ref.toLocaleString({
+          weekday: 'long'
+        })
+      }
       return x
     })
   },
-  get calendarTitle(){ //Formatting title -localized
-      return this.curR.toLocaleString({year: 'numeric', month: 'short'}).toUpperCase()
+  get calendarTitle() { //Formatting title -localized
+    return this.curR.toLocaleString({
+      year: 'numeric',
+      month: 'short'
+    }).toUpperCase()
   },
-  get initializedTimes(){ //turn to dates from ms
-  return this.times.map(x=>{
-    return x.map(x=>{
-      return DT.fromMillis(x)
-    })
-  })
-  },
-  get storeHours(){ //format store hours -localized
-    return this.initializedTimes.map(x=>{
-      return x.map(y=>{
+  get storeHours() { //format store hours -localized
+    return this.initializedTimes.map(x => {
+      return x.map(y => {
         return y.toLocaleString(DT.TIME_SIMPLE)
       })
     })
   },
 
-  get sortUsers(){ //by starting dates
-  var self = this
-    return this.users.map(x=>{
-      x.times.sort((x,y)=>x[0]-y[0])
+  get sortUsers() { //by starting dates
+    var self = this
+    return this.users.map(x => {
+      x.times.sort((x, y) => x[0] - y[0])
       return x
     })
   },
   //if you decide to prefetch, it may be appropriate to introduce intermediary step
   //that splices sort users, and the proceeds to map in another computation
   //operates on raw times
-  get mapUsers(){ //TODO may not output some or none
-  console.log("mapUsers triggered")
+  get mapUsers() {
+    console.log("mapUsers triggered")
     var self = this
-    return mobx.toJS(self.sortUsers).map((x, zxc, zxcv)=>{
+    return mobx.toJS(self.sortUsers).map((x, zxc, zxcv) => {
       var ind = 0
       var res, uI //userIndex
-      x.weekDays = s.times.reduce((ac, y,i, ar)=>{
-        var  zx =  {}
+      x.weekDays = s.initializedTimes.reduce((ac, y, i, ar) => {
+        var zx = {}
 
 
-        if (i == 0){
+        if (i == 0) {
           var a = arrangeUsers(0, x, ar)
           res = a.res
           uI = a.uI
         }
-        if (uI == i){
+        if (uI == i) {
           zx.status = res
-          var a = arrangeUsers(uI+1, x, ar)
+          var a = arrangeUsers(uI + 1, x, ar)
           res = a.res
           uI = a.uI
           // console.log(ind, i, res)
@@ -169,76 +258,115 @@ get conf(){
         return ac
       }, [])
 
-    return x
+      return x
     })
   },
-  get disabledDays(){
+  get disabledDays() {
     return this.disabled
-    return this.times.map((x,i)=>{x.ind = i; return x}).filter(x=>x.disabled).reduce((a, x)=>{a[x.ind]=true;return a}, {})
+    return this.times.map((x, i) => {
+      x.ind = i;
+      return x
+    }).filter(x => x.disabled).reduce((a, x) => {
+      a[x.ind] = true;
+      return a
+    }, {})
   },
 
-  get selectedStart(){ //for User on day
+  get selectedStart() { //for User on day
     var st = s
-    if (st.mapUsers[st.selectedUser].times[st.selectedDay][0]==""){
+    if (st.mapUsers[st.selectedUser].times[st.selectedDay][0] == "") {
       return "none"
     } else {
-    var selectedStart = DT.fromMillis(st.mapUsers[st.selectedUser].times[st.selectedDay][0]).toLocaleString(DT.TIME_SIMPLE)
+      var selectedStart = DT.fromMillis(st.mapUsers[st.selectedUser].times[st.selectedDay][0]).toLocaleString(DT.TIME_SIMPLE)
     }
     return selectedStart
   },
-  get selectedEnd(){ //for User on day
+  get selectedEnd() { //for User on day
     var st = s
-    if (st.mapUsers[st.selectedUser].times[st.selectedDay][1] == ""){
+    if (st.mapUsers[st.selectedUser].times[st.selectedDay][1] == "") {
       return "none"
     }
     var selectedStart = DT.fromMillis(s.mapUsers[s.selectedUser].times[s.selectedDay][1]).toLocaleString(DT.TIME_SIMPLE)
     return selectedStart
-  }
+  },
+  get initializedTimes() { //turn to dates from ms
+    return this.times.map(x => {
+      return x.map(x => {
+        return DT.fromMillis(x)
+      })
+    }).reduce(function(a, x, i){
+      if 
+    }, this.dayPeriods)
+  },
 
 })
 var s = Store
 
-    //////////////////////////////////utilities
-    //pairs some schema index to non-empty value; helps record empty values
-    function arrangeUsers(uI, x, arr) {
-      for (uI; uI < arr.length; uI++) {
-        if (x.times[uI][0] >= arr[uI][0] && x.times[uI][1] <= arr[uI][1]) {
-          if (x.times[uI][0] == arr[uI][0] && x.times[uI][1] == arr[uI][1]) {
-            return {
-              uI: uI,
-              res: "full"
-            }
-          } else {
-            return {
-              uI: uI,
-              res: "some"
-            }
-          }
+//////////////////////////////////utilities
+//pairs some schema index to non-empty value; helps record empty values
+function arrangeUsers(uI, x, arr) {
+  for (uI; uI < arr.length; uI++) {
+    if (x.times[uI][0] >= arr[uI][0] && x.times[uI][1] <= arr[uI][1]) {
+      if (x.times[uI][0] == arr[uI][0] && x.times[uI][1] == arr[uI][1]) {
+        return {
+          uI: uI,
+          res: "full"
+        }
+      } else {
+        return {
+          uI: uI,
+          res: "some"
         }
       }
-
-      return {
-        ind: arr.length,
-        res: "none",
-        uI: uI
-      }
     }
+  }
 
-function setFields(){ //fields for the dropdown indicating user's hours
-  var min = s.initializedTimes[s.selectedDay][0],
-  max = s.initializedTimes[s.selectedDay][1],
-  steps = s.conf.sI
-  return {min,max,steps}
+  return {
+    ind: arr.length,
+    res: "none",
+    uI: uI
+  }
 }
-function makeFields (d){
+
+function setFields() { //fields for the dropdown indicating user's hours
+  var min = s.initializedTimes[s.selectedDay][0],
+    max = s.initializedTimes[s.selectedDay][1],
+    steps = s.conf.sI
+  return {
+    min,
+    max,
+    steps
+  }
+}
+
+function makeFields(d) {
   var interval = luxon.Interval.fromDateTimes(d.min, d.max),
-  intervals = interval.splitBy(d.steps),
-  res = intervals.map(x=>x.start)
+    intervals = interval.splitBy(d.steps),
+    res = intervals.map(x => x.start)
   // res.push(d.max) anti-pattern, adds 59 minutes
   s.dailyTimes = res
 }
 makeFields(setFields())
 mobx.reaction(setFields, makeFields);
+
+mobx.autorun(() => { //query helper
+  function modifyUser(x) {
+    if (st == 0) {
+      x.times = Array(len).fill(["", ""], 0, len).concat(x.times)
+      return x
+    } else {
+      x.times = x.times.concat(Array(len).fill(["", ""], 0, len))
+      return x
+    }
+  }
+
+  var st = s.badIndexes[0],
+    en = s.badIndexes[1],
+    len = en - st + 1
+  s.users.map(modifyUser)
+
+})
+
 
 // mobx.autorunAsync(()=>{
 //   s.times = s.debouncedTimes.toJS()
@@ -250,18 +378,18 @@ mobx.reaction(setFields, makeFields);
 
 
 
-    ///////////////////////////////////fixtures
-    /*
-    Generate times for given week
-    var a = JSON.stringify(s.dayPeriods.map(x=>{
-      return x.map(x=>{
-        return x.ts
-      })
-    })
-    )
-    */
-    /////////////////////////////////////////
-    // {user: "name", date: [1517680800000, 1517767199999]}
+///////////////////////////////////fixtures
+/*
+Generate times for given week
+var a = JSON.stringify(s.dayPeriods.filter(x=>s.curR.month != x[0].month.map(x=>{
+  return x.map(x=>{
+    return x.ts
+  })
+})
+)
+*/
+/////////////////////////////////////////
+// {user: "name", date: [1517680800000, 1517767199999]}
 
 
 
