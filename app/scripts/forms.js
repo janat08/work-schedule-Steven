@@ -1,7 +1,8 @@
   class forms extends hyperElement{
     setup(n){
       var a = au(n(s))
-      return a
+      var b = mobx.reaction(setFields, makeFields, {delay: 100});
+      return ()=>{a();b();return}
     }
 
   render(h, st){

@@ -16,7 +16,10 @@ class storeHours extends hyperElement{
         <th>times</th>
       </tr>
   ${
-  st.times.map((item, i)=>{ //intentional periods
+  st.initializedTimes.map((item, i)=>{ //intentional periods
+    if (i <= st.badIndexes[1] && i >= st.badIndexes[0]) {
+      return w()`<a></a>`
+    }
     function disable(){
       return a.toggleDisable(i)
     }
@@ -57,7 +60,7 @@ class storeHours extends hyperElement{
 
     return w(item, ":storeItem")`
           <tr>
-      <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : (i >= st.badIndexes[0] && i <= st.badIndexes[1])? "warning": ""}`}>
+      <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : ""}`}>
 ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}</td>
 
 <td onclick=${disable}> 
@@ -91,7 +94,7 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 // pick: action((val, i, edge)=>{ //state is changed on input
 //   s.times[s.selectedDay][edge] = val
 // }),
-    
+
 // <h4>Pick Start</h4>
 // <h5>Hours</h5>
 // ${hours(0)}
@@ -116,11 +119,11 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 //           var style = {color: "red"}
 //         } else {
 //           if(edge){
-//             if (x < st.initializedTimes[st.selectedDay][1].minute) { //TODO end times are at 00, should be changed back
+//             if (x < st.initializedTimes[st.selectedDay][1].minute) {
 //               var style = {color: "orange"}
 //             }
 //           } else {
-//             if (x > st.initializedTimes[st.selectedDay][0].minute) { //TODO end times are at 00, should be changed back
+//             if (x > st.initializedTimes[st.selectedDay][0].minute) {
 //               var style = {color: "orange"}
 //             }
 //           }
@@ -146,7 +149,7 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 //       var style = {}
 //       if (i == st.initializedTimes[st.selectedDay][0].hour || i == st.initializedTimes[st.selectedDay][1].hour) {
 //         var style = {color: "red"}
-//       } else if (i < st.initializedTimes[st.selectedDay][1].hour && i > st.initializedTimes[st.selectedDay][0].hour) { //TODO end times are at 00, should be changed back
+//       } else if (i < st.initializedTimes[st.selectedDay][1].hour && i > st.initializedTimes[st.selectedDay][0].hour) {
 //         var style = {color: "orange"}
 //       }
 
@@ -156,7 +159,7 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 //       }
 
 //       return w()`
-//   <span onclick=${pick}  class="time-selection__cell" style=${style}>${x}</span> ${br}  
+//   <span onclick=${pick}  class="time-selection__cell" style=${style}>${x}</span> ${br}
 //   `
 //     })
 //   }`

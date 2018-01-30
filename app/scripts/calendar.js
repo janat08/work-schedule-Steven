@@ -68,19 +68,19 @@ class calendar extends hyperElement{
                 function selectUser(){
                   return a.selectUser(y)
                 }
-                return w(u, "calendarUser"+u.name)`
+                return w(u, "calendarUserRow")`
                 <tr>
 <td class=${`${y==st.selectedUser?"info":""}`} onclick=${selectUser}>
               ${u.name}
               </td>
-            ${st.users[y].weekDays.map((x,i)=>{
+            ${st.mapUsers[y].weekDays.map((x,i)=>{
   if(st.disabledDays[i]){
     return w()`<td class="active"></td>`
   }
   function toggleDay(){
     return a.toggleDay(y, i)
   }
-  return w(x, ":calendartd")`
+  return w(x, ":calendarTD")`
     <td onclick=${toggleDay}> ${st.mapUsers[y].weekDays[i].status=="full"? ['<i class="fa fa-check fa-lg" style="color:green" aria-hidden="true"></i>'] :
     st.mapUsers[y].weekDays[i].status=="some"? ['<i class="fa fa-check fa-lg" style="color:orange" aria-hidden="true"></i>'] :""} </td>
             `
