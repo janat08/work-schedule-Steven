@@ -1,12 +1,17 @@
   class forms extends hyperElement{
     setup(n){
       var a = au(n(s))
-      var b = mobx.reaction(setFields, makeFields, {delay: 100});
-      return ()=>{a();b();return}
+      // var b = mobx.reaction(setFields, makeFields, {delay: 100});
+      return ()=>{a();return}
     }
 
   render(h, st){
-
+//       var slice = 0
+// if (st.badIndexes[0] == 0){
+//   slice = {st:}
+// } else if (st.badIndexes[1] == 6){
+//
+// }
     return h`
     <div class="dropdown">
     Selected Day:
@@ -15,7 +20,7 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-          ${st.calendarWeek.map((x, i) => {
+          ${st.calendarWeek.slice(st.queryIndexes[0], st.queryIndexes[1]+1).map((x, i) => {
 
       function selectDay() {
         return a.selectDay(i)
@@ -46,6 +51,7 @@
     })}
         </ul>
       </div>
+      ${st.timesUnselected? ()=>w()`business hours unselected` : ""}
     <div class="dropdown">
     Start:
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -59,7 +65,7 @@
           return a.selectStart(x)
         }
       return w(x, ":userStart")`
-            <li onclick=${selectStart}><a>${x.toLocaleString(DT.TIME_SIMPLE)}</a></li>
+            <li onclick=${selectStart}><a>${x.formatted}</a></li>
             `
     })}
         </ul>
@@ -72,14 +78,14 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-          ${st.dailyTimes.map((x,i)=>{
+          ${st.dailyTimes.length?st.dailyTimes.map((x,i)=>{
             function selectEnd(){
               return a.selectEnd(x)
             }
             return w(x, ":userEnd")`
-            <li onclick=${selectEnd}><a>${x.toLocaleString(DT.TIME_SIMPLE)}</a></li>
+            <li onclick=${selectEnd}><a>${x.formatted}</a></li>
             `
-    })}
+    }):()=>w()`<a>Unselected</a>`}
         </ul>
       </div>
       

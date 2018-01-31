@@ -28,9 +28,6 @@ document.registerElement("store-hours", storeHours)
 document.registerElement("forms-tag", forms)
 
 
-au(()=>{
- console.log("SUCCESS", s.users[0].name, Store.userCheck)
-})
 // ${storeHours()}
 // ${forms()}
 

@@ -7,24 +7,45 @@ var au = autorun
 var Dur = luxon.Duration
 var Int = luxon.Interval
 var JS = mobx.toJS
+var data = [[1517421600000,1517507999999],[1517508000000,1517594399999],[1517594400000,1517680799999],[1517680800000,1517767199999]]
+// initedData = initTimes(data)
+var mobxArrayBoilerplate = [["",""],["",""],["",""],["",""],["",""],["",""],["",""],]
 
 //https://github.com/mobxjs/mobx-utils
 //fromPromise, initiate store with initial values
+var mapFields = mobx.createTransformer(function(d) {
+  var min = d[0], max = d[1]
+  if(min == ""){
+    return []
+  }
+  if(max == ""){
+    return []
+  }
+  var interval = luxon.Interval.fromDateTimes(min, max),
+    intervals = interval.splitBy(s.conf.sI),
+    res = intervals.map(mapFormat)
+  return res
+})
+var mapFormat = mobx.createTransformer(function(d){
+d.formatted = d.start.toLocaleString(DT.TIME_SIMPLE)
+  return d
+})
+
 var Store = observable({
   /* some observable state */
   curR: DT.local().plus({
     day: 3
   }), //currentReference,
   //schema: times:  [paired values]
-  users: [{
-    name: "name",
-    times:
-    [["", ""],[1517508000000,1517594399999],[1517594400000,1517680799999],[1517680800000,1517767199999]]
+  users:  [],
+  timesUnselected: false,
+  //["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
 
-    //["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
-  }],
-  times:
-    [[1517421600000,1517507999999],[1517508000000,1517594399999],[1517594400000,1517680799999],["", ""]]
+  times: mobxArrayBoilerplate
+  // initTimes.call(this, data)
+  // this.initializeTimes
+
+  // [[1517421600000,1517507999999],[1517508000000,1517594399999],[1517594400000,1517680799999],["", ""]]
   ,
 
   disabled: {
@@ -48,6 +69,12 @@ var Store = observable({
         minutes: this.config.sliderInt
       })
     }
+  },
+  get dailyTimes(){
+    return this.dailyTimesBoilerplate[s.selectedDay]
+  },
+  get dailyTimesBoilerplate(){
+    return this.times.map((x)=>mapFields(x))
   },
   get selectedStart() { //for User on day
     var st = s
@@ -81,21 +108,30 @@ var Store = observable({
     var c = this.curR.weekday-1
     this.curR = this.curR.plus({days: val-c})
   },
-  get queryPeriods() {
-    return this.dayPeriods.map(x => x[0]).filter(x => x.month == s.curR.month)
+  get queryIndexes(){ //todo [7, 6] if walking backwards
+    var b = [0, 6]
+
+    if (this.dayPeriods[0][0].month != this.performanceWeekSpan.month){
+      b = [7-this.dayPeriods.slice().reverse().findIndex(x=>x[0].month != this.performanceWeekSpan.month), this.dayPeriods.length-1,]
+    } else if (this.dayPeriods[6][0].month != this.performanceWeekSpan.month){
+      b = [0, -1+this.dayPeriods.findIndex(x=>x[0].month != this.performanceWeekSpan.month),]
+    }
+    console.log("indexes", b)
+    return b
   },
+  queryPeriods: mobx.computed(function() {
+    // mobx.whyRun()
+    console.log("queryPeriods")
+    return [this.dayPeriods[this.queryIndexes[0]][0], this.dayPeriods[this.queryIndexes[1]][1]]
+
+  }, {equals: (a,b)=>{return a[0] == b[0]}}),
   get badIndexes() { //from 0 index, inclusive
-    var map = s.queryPeriods,
-      len = map.length,
-      start = map[0].weekday - 1,
-      end = map[len - 1].weekday - 1
-    if (end != 6 || start != 0) {
-      if (start != 0) {
-        return [0, start - 1]
+    var map = s.queryIndexes
+      if(map[0] != 0){
+        return [0, map[0]-1]
+      } else if (map[1] != 6){
+        return [map[1]+1, 6]
       } else {
-        return [end + 1, 6]
-      }
-    } else {
       return [8, 8]
     }
   },
@@ -105,10 +141,10 @@ var Store = observable({
       month: this.curR.month,
       weekNumber: this.curR.weekNumber
     }
-  }, {equals: (a,b)=>{console.log(a==b,"fired", a.year==b.year && a.month==b.month); return a.year==b.year && a.month==b.month && b.weekNumber == a.weekNumber}}),
+  }, {equals: (a,b)=>{return a.year==b.year && a.month==b.month && b.weekNumber == a.weekNumber}}),
   get weekSpan() { //span of month across weeks
     var yeMo = {year: this.performanceWeekSpan.year, month: this.performanceWeekSpan.month}
-      first = DT.fromObject(yeMo),
+    first = DT.fromObject(yeMo),
       first = first.plus({
         days: (7 - first.weekday) - 6
       }),
@@ -124,24 +160,6 @@ var Store = observable({
       first
     }
   },
-  // weekSpan: mobx.createTransformer(function() { //span of month across weeks
-  //     var yeMo = this.performanceWeekSpan
-  //     first = DT.fromObject(yeMo),
-  //       first = first.plus({
-  //         days: (7 - first.weekday) - 6
-  //       }),
-  //       last = DT.fromObject(yeMo).minus({
-  //         month: -1,
-  //         millisecond: 1
-  //       }),
-  //       last = last.plus({
-  //         days: (7 - last.weekday)
-  //       })
-  //     return {
-  //       last,
-  //       first
-  //     }
-  //   },
   get weeksNum() { //weeks in the month (inclusive)
     var last = this.weekSpan.last,
       first = this.weekSpan.first
@@ -169,7 +187,7 @@ var Store = observable({
     res.pop()
     return res
   },
-  get dayPeriods() { //[start, end] times of day for current week
+  dayPeriods: mobx.computed(function() { //[start, end] times of day for current week
     console.log('dayPeriods')
     var first = this.weekPeriods[this.currentWeek][0]
     var res = [first]
@@ -189,18 +207,11 @@ var Store = observable({
     })
     res.pop()
     return res
-  },
+  }, {equals: (a,b)=>{console.log(a[0][0].ts == b[0][0].ts, "dayPeriods"); return a[0][0].ts == b[0][0].ts}}
+  ),
   get currentWeek() { //returns index of week
     var self = this
     return this.performanceWeekSpan.weekNumber - this.weekPeriods[0][0].weekNumber
-    // return this.weekPeriods.reduce(function (a, x, i) {
-    //   if (x[0] <= self.curR && x[1] >= self.curR) {
-    //     a = i
-    //     return a
-    //   } else {
-    //     return a
-    //   }
-    // }, 0)
   },
   get calendarWeek() { //Formatting days -localized
     return this.dayPeriods.map(x => {
@@ -226,7 +237,7 @@ var Store = observable({
     }).toUpperCase()
   },
   get storeHours() { //format store hours -localized
-    return this.initializedTimes.map(x => {
+    return this.times.map(x => {
       return x.map(y => {
         return y.toLocaleString(DT.TIME_SIMPLE)
       })
@@ -242,62 +253,27 @@ var Store = observable({
       return a
     }, {})
   },
-  get sortTimes(){
-    return clone(mobx.toJS(this.times)).map(x => {
-      return x.map(x => {
-        return DT.fromMillis(x)
-      })
-    })
+  get initializeTimes() { //is unused, but required, was suppose to formats, converts times, getter is used when store has just spawned
+    return initTimes.call(this, data)
   },
-  get initializedTimes() { //turn to dates from ms
-    var ind = 0, tI = 0, self = this
-    return this.dayPeriods.reduce(function(a, x, i, ar){
-      var zx
-      if (i == 0){
-        ind = arrangeTimes(0, tI, self.sortTimes, ar)
-      }
-      if (ind == i){
-        zx= x
-        tI += 1
-        ind = arrangeTimes(ind+1, tI, self.sortTimes, ar)
-      } else {
-        zx = ["", ""]
-      }
-      a.push(zx)
-      return a
-    }, [])
+  set initializeTimes(data){
+    this.times = initTimes.call(this, data)
   },
-  // get sortUsers() { //by starting dates
-  //   var self = this
-  //   return this.users.map(x => {
-  //     x.times.sort((x, y) => x[0] - y[0])
-  //     return x
-  //   })
-  // },
-  /* a derived value */
-  get sortUsers() { //by starting dates
-    var self = this
-    var st = s.badIndexes[0],
-      en = s.badIndexes[1],
-      len = en - st + 1
-    var a = clone(mobx.toJS(self.users)).map(x => {
-      x.times = x.times.sort((x, y) =>{ x[0] - y[0]})
-      if (st == 0) {
-        x.times = Array(len).fill(["", ""], 0, len).concat(x.times)
-        return x
-      } else if (en == 6) {
-        x.times = x.times.concat(Array(len).fill(["", ""], 0, len))
-        return x
-      }
-    })
-    return a
+  get initializeUsers(){
+    return initUsers.call(this, data)
+  },
+  set initializeUsers(data){
+    this.users = initUsers.call(this, data)
   },
   //if you decide to prefetch, it may be appropriate to introduce intermediary step
   //that splices sort users, and the proceeds to map in another computation
   get mapUsers() {
-    console.log("mapUsers triggered")
+    if (this.users.length == 0){
+      return []
+    }
+    console.log("mapUsers triggered") //TODO suspicious stuff here at 262, try debug
     var self = this
-    return self.sortUsers.map((x, zxc, zxcv) => {
+    return self.users.map((x, zxc, zxcv) => {
       var ind = 0, f=0
       var nonEmpty = x.times.reduce((a,x,i)=>{
         if (x[0] != "" && x[1] != ""){
@@ -306,7 +282,7 @@ var Store = observable({
         return a
       }, [])
       var res, uI //userIndex
-      x.weekDays = s.initializedTimes.reduce((ac, y, i, ar) => {
+      x.weekDays = s.times.reduce((ac, y, i, ar) => {
         var zx = {}
         if (i == 0) {
           var a = arrangeUsers(0, nonEmpty[f], x.times, ar)
@@ -332,6 +308,80 @@ var Store = observable({
 })
 s = Store
 
+function initUsers(data){
+  var self = this
+  console.log(data)
+  var a = data.map(x => {
+    x.times = x.times.sort((x, y) =>{ x[0] - y[0]})
+    var ind = 0, tI = 0, res = x.times
+    res = this.dayPeriods.reduce(function(a, x, i, ar){
+      var zx
+      if (i == 0){
+        ind = arrangeTimes(0, tI, res, ar)
+      }
+      if (ind == i){
+        zx= (self.badIndexes[0] <= i && self.badIndexes[1] >= i)? ["", ""]: res[tI]
+        tI += 1
+        ind = arrangeTimes(ind+1, tI, res, ar)
+      } else {
+        zx = ["", ""]
+      }
+      a.push(zx)
+      return a
+    }, [])
+    console.log("mid", res, x)
+    x.times = res
+    return x
+    // var st = this.badIndexes[0],
+    //   en = this.badIndexes[1],
+    //   len = en - st + 1
+    // if (st == 0) {
+    //   x.times = Array(len).fill(["", ""], 0, len).concat(x.times)
+    //   return x
+    // } else if (en == 6) {
+    //   x.times = x.times.concat(Array(len).fill(["", ""], 0, len))
+    //   return x
+    // }
+  })
+  console.log(a)
+  return a
+}
+
+function initTimes(data){
+  var res = data.map(x => {
+      return x.map(x => {
+        return DT.fromMillis(x)
+      })
+    }),
+    ind = 0, tI = 0,
+    res = this.dayPeriods.reduce(function(a, x, i, ar){
+      var zx
+      if (i == 0){
+        ind = arrangeTimes(0, tI, res, ar)
+      }
+      if (ind == i){
+        zx= res[tI]
+        tI += 1
+        ind = arrangeTimes(ind+1, tI, res, ar)
+      } else {
+        zx = ["", ""]
+      }
+      a.push(zx)
+      return a
+    }, [])
+  return res
+}
+mobx.autorun(()=>{
+  console.log("innited")
+  s.initializeTimes = data
+  s.initializeUsers =  [{
+    name: "",
+    times: data
+
+  }]
+  // s.times = initTimes.call(s, data)
+})
+
 //////////////////////////////////utilities
 //pairs some schema index to non-empty value; helps record empty values
 function arrangeTimes(uI, i, x, arr) {
@@ -344,7 +394,6 @@ function arrangeTimes(uI, i, x, arr) {
 }
 
 function arrangeUsers(uI, i, x, arr) {
-
   for (uI; uI < arr.length; uI++) {
     if (x[i][0] >= arr[uI][0] && x[i][1] <= arr[uI][1]) {
       if (x[i][0] == arr[uI][0] && x[i][1] == arr[uI][1]) {
@@ -368,30 +417,46 @@ function arrangeUsers(uI, i, x, arr) {
   }
 }
 
-function setFields() { //fields for the dropdown indicating user's hours
-  var min = s.initializedTimes[s.selectedDay][0],
-    max = s.initializedTimes[s.selectedDay][1],
-    steps = s.conf.sI
-  return {
-    min,
-    max,
-    steps
-  }
-}
+// function setFields() { //fields for the dropdown indicating user's hours
+//   var min = s.times[s.selectedDay][0],
+//     max = s.times[s.selectedDay][1],
+//     steps = s.conf.sI
+//   return {
+//     min,
+//     max,
+//     steps
+//   }
+// }
+// function chooseFields(){
+//
+// }
+//
+//
+//
+//
+// function makeFields(d) {
+//   var toggleNotification = false
+//   var min = d.min, max = d.max
+//   if(min == ""){
+//     toggleNotification = true
+//     min = s.dayPeriods[s.selectedDay][0]
+//   }
+//   if(max == ""){
+//     toggleNotification = true
+//     max = s.dayPeriods[s.selectedDay][1]
+//   }
+//   console.log("makeFields", max, min)
+//   s.timesUnselected = toggleNotification
+//   var interval = luxon.Interval.fromDateTimes(min, max),
+//     intervals = interval.splitBy(d.steps),
+//     res = intervals.map(x => x.start)
+//   // res.push(d.max) anti-pattern, adds 59 minutes
+//   s.dailyTimes = res
+// }
+//
+// makeFields(setFields()) //also used as reaction in forms
 
-function makeFields(d) {
-  var interval = luxon.Interval.fromDateTimes(d.min, d.max),
-    intervals = interval.splitBy(d.steps),
-    res = intervals.map(x => x.start)
-  // res.push(d.max) anti-pattern, adds 59 minutes
-  s.dailyTimes = res
-}
 
-makeFields(setFields()) //also used as reaction in forms
-
-mobx.autorun(()=>{
-  console.log("autorun init")
-})
 
 
 // mobx.autorun(() => { //query helper

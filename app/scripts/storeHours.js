@@ -6,7 +6,7 @@ class storeHours extends hyperElement{
   }
   render(h, st){
 
-  return h`
+  return h` 
   <div class="hours">
     <h3>Store Hours</h3>
     <table class="table table-striped">
@@ -16,7 +16,7 @@ class storeHours extends hyperElement{
         <th>times</th>
       </tr>
   ${
-  st.initializedTimes.map((item, i)=>{ //intentional periods
+  st.times.map((item, i)=>{ //intentional periods
     if (i <= st.badIndexes[1] && i >= st.badIndexes[0]) {
       return w()`<a></a>`
     }

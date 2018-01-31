@@ -30,16 +30,16 @@ a = {
 
     var status = s.users[y].weekDays[i].status
     if (status != "full"){
-      time.splice(0,2, s.initializedTimes[i][0].plus({}).ts, s.initializedTimes[i][1].plus({}).ts)
+      time.splice(0,2, s.times[i][0].plus({}).ts, s.times[i][1].plus({}).ts)
     } else {
       time.splice(0,2,"", "")
     }
     console.log(time)
   }),
-pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like in computed initializedTimes
+pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like in computed times
   checkBadI(i) //is redundant as bad time picker won't render
   console.log(val.toString(),i, edge)
-  s.times[i][edge] = val.ts
+  s.times[i][edge] = val
 }),
   toggleDisable: action((i)=>{
     checkBadI(i)
@@ -50,7 +50,7 @@ pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like
     // s.times[i].disabled = !s.times[i].disabled
   }),
   selectStart: action((x)=>{ //for user
-    checkBadI(i)
+    checkBadI(x)
     if (s.users[s.selectedUser].times[s.selectedDay][0] == ""){
       s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, x.ts, s.dailyTimes[s.dailyTimes.length-1].plus({}).ts)
     } else {
@@ -58,14 +58,14 @@ pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like
     }
   }),
   selectEnd: action((x)=>{ //for user
-    checkBadI(i)
+    checkBadI(x)
     if (s.users[s.selectedUser].times[s.selectedDay][1] == ""){
       s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, s.dailyTimes[0].plus({}).ts, x.ts)
     } else {
       s.users[s.selectedUser].times[s.selectedDay][1]= x.ts
     }  }),
 
-  selectDay: action((x)=>{ //TODO bad performance
+  selectDay: action((x)=>{
     checkBadI(x)
     s.selectedDay = x
   })
