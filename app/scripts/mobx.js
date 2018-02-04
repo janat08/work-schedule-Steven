@@ -273,6 +273,9 @@ var Store = observable({
         }
         return a
       }, [])
+      if (nonEmpty.length == 0){
+        x.weekDays = [{status: "none"},{status: "none"},{status: "none"},{status: "none"},{status: "none"},{status: "none"},{status: "none"},]
+      } else {
       var res, uI //userIndex
       x.weekDays = s.times.reduce((ac, y, i, ar) => {
         var zx = {}
@@ -294,6 +297,7 @@ var Store = observable({
         ac.push(zx)
         return ac
       }, [])
+    }
       return x
     })
   },
@@ -365,12 +369,12 @@ function initTimes(data){
 }
 mobx.autorun(()=>{
   console.log("innited")
-  s.initializeTimes = data
-  s.initializeUsers =  [{
-    name: "",
-    times: data
+  // s.initializeTimes = data
+  // s.initializeUsers =  [{
+  //   name: "",
+  //   times: data
 
-  }]
+  // }]
 })
 
 //////////////////////////////////utilities
