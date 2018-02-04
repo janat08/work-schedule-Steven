@@ -33,9 +33,7 @@ d.formatted = d.start.toLocaleString(DT.TIME_SIMPLE)
 
 var Store = observable({
   /* some observable state */
-  curR: DT.local().plus({
-    day: 3
-  }), //currentReference,
+  curR: DT.local(), //currentReference,
   //schema: times:  [paired values]
   users:  [],
   //["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
@@ -113,7 +111,7 @@ var Store = observable({
     console.log("queryPeriods")
     return [this.dayPeriods[this.queryIndexes[0]][0], this.dayPeriods[this.queryIndexes[1]][1]]
 
-  }, {equals: (a,b)=>{return a[0] == b[0]}}),
+  }, "queryPeriods", {equals: (a,b)=>{return a[0] == b[0]}}),
   get badIndexes() { //from 0 index, inclusive
     var map = s.queryIndexes
       if(map[0] != 0){
@@ -245,7 +243,7 @@ var Store = observable({
   get initializeTimes() { //is unused, but required, was suppose to formats, converts times, getter is used when store has just spawned
     return initTimes.call(this, data)
   },
-  set initializeTimes(data){
+  set initializeTimes(data){ //will not only initialize but also update
     this.times = initTimes.call(this, data)
   },
   get initializeUsers(){
@@ -253,6 +251,11 @@ var Store = observable({
   },
   set initializeUsers(data){
     this.users = initUsers.call(this, data)
+  },
+  get storeHoursDropDownValues(){
+    return this.times.map((item,i)=>{
+      return luxon.Interval.fromDateTimes(s.dayPeriods[i][0], s.dayPeriods[i][1]).splitBy(s.conf.sI).map(x=>{return {start: x.start, formatted: x.start.toLocaleString(DT.TIME_SIMPLE)}})
+    })
   },
   //if you decide to prefetch, it may be appropriate to introduce intermediary step
   //that splices sort users, and the proceeds to map in another computation
@@ -368,7 +371,6 @@ mobx.autorun(()=>{
     times: data
 
   }]
-  // s.times = initTimes.call(s, data)
 })
 
 //////////////////////////////////utilities

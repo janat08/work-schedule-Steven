@@ -16,7 +16,7 @@ class storeHours extends hyperElement{
         <th>times</th>
       </tr>
   ${
-  st.times.map((item, i)=>{ //intentional periods
+  st.storeHoursDropDownValues.map((boilerplate, i)=>{ //intentional periods
     if (i <= st.badIndexes[1] && i >= st.badIndexes[0]) {
       return w()`<a></a>`
     }
@@ -26,10 +26,7 @@ class storeHours extends hyperElement{
     function selectDay(){
       return a.selectDay(i)
     }
-
-    var boilerplate = luxon.Interval.fromDateTimes(st.dayPeriods[i][0], st.dayPeriods[i][1]).splitBy(st.conf.sI).map(x=>x.start)
       function dropDown(edge){
-
         // if (edge == 0){ //tried to remove from start dropdown times after selected end and the reverse, i imagine using autocomplete would be better
         //   var cut = boilerplate.findIndex((x)=>x==st.initializedTimes[i][1])
         //   var spliced = boilerplate.slice().splice(cut, boilerplate.length-cut+1)
@@ -46,10 +43,10 @@ class storeHours extends hyperElement{
           <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
               ${boilerplate.map((y, z)=>{
                   function pick() {
-                    return a.pick(y, i, edge)
+                    return a.pick(y.start, i, edge)
                   }
                   return w(y, ":selectHours"+i+edge)`
-                  <li onclick=${pick}><a>${y.toLocaleString(DT.TIME_SIMPLE)}</a></li>
+                  <li onclick=${pick}><a>${y.formatted}</a></li>
                   `
               })
             }
@@ -58,7 +55,7 @@ class storeHours extends hyperElement{
               `
       }
 
-    return w(item, ":storeItem")`
+    return w(boilerplate, ":storeItem")`
           <tr>
       <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : ""}`}>
 ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}</td>
