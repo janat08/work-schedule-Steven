@@ -38,9 +38,7 @@ var Store = observable({
   }), //currentReference,
   //schema: times:  [paired values]
   users:  [],
-  timesUnselected: false,
   //["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
-
   times: mobxArrayBoilerplate
   // initTimes.call(this, data)
   // this.initializeTimes
@@ -62,7 +60,6 @@ var Store = observable({
     sliderInt: 30 //forms, too
   },
   selectedUser: 0,
-  dailyTimes: [], //shown as options in select forms
   get conf() {
     return {
       sI: Dur.fromObject({
@@ -70,7 +67,7 @@ var Store = observable({
       })
     }
   },
-  get dailyTimes(){
+  get dailyTimes(){ //shown as options in user times select forms
     return this.dailyTimesBoilerplate[s.selectedDay]
   },
   get dailyTimesBoilerplate(){
@@ -94,14 +91,6 @@ var Store = observable({
     return selectedStart
   },
   get selectedDay() {
-    var st = s.badIndexes[0],
-      en = s.badIndexes[1],
-      res = this.curR.plus({
-        day: 6
-      }).weekday - 1
-    // if (st == 0) {
-    //   return en + res
-    // }
     return this.curR.weekday - 1
   },
   set selectedDay(val) {
@@ -141,7 +130,7 @@ var Store = observable({
       month: this.curR.month,
       weekNumber: this.curR.weekNumber
     }
-  }, {equals: (a,b)=>{return a.year==b.year && a.month==b.month && b.weekNumber == a.weekNumber}}),
+  }, {name: "performanceWS", equals: (a,b)=>{return a.year==b.year && a.month==b.month && b.weekNumber == a.weekNumber}}),
   get weekSpan() { //span of month across weeks
     var yeMo = {year: this.performanceWeekSpan.year, month: this.performanceWeekSpan.month}
     first = DT.fromObject(yeMo),

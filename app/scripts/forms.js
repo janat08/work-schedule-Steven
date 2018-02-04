@@ -51,7 +51,6 @@
     })}
         </ul>
       </div>
-      ${st.timesUnselected? ()=>w()`business hours unselected` : ""}
     <div class="dropdown">
     Start:
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -78,14 +77,14 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-          ${st.dailyTimes.length?st.dailyTimes.map((x,i)=>{
+          ${st.dailyTimes.map((x,i)=>{
             function selectEnd(){
               return a.selectEnd(x)
             }
             return w(x, ":userEnd")`
             <li onclick=${selectEnd}><a>${x.formatted}</a></li>
             `
-    }):()=>w()`<a>Unselected</a>`}
+    })}
         </ul>
       </div>
       
