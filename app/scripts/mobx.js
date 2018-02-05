@@ -383,8 +383,24 @@ function initTimes(data){
     }, [])
   return res
 }
-mobx.autorun(()=>{
-  console.log("innited")
+
+mobx.autorun(()=>{ //look here
+ var a =  s.queryPeriods[0]
+  var a = s.dayPeriods.filter(x=>s.curR.month == x[0].month).map(x=>{
+    return x.map(x=>{
+      return x.ts
+    })
+  })
+  s.initializeTimes = a
+  s.initializeUsers =  [{
+    name: "name",
+    times: a
+  },{
+    name: "name",
+    times: a
+  },
+  ]
+
   // s.initializeTimes = [[1517767200000,1517853599999],[1517853600000,1517939999999],[1517940000000,1518026399999],[1518026400000,1518112799999],[1518112800000,1518199199999],[1518199200000,1518285599999],[1518285600000,1518371999999]]
   // s.initializeUsers =  [{
   //   name: "",
