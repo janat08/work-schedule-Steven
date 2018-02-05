@@ -125,12 +125,11 @@ var Store = observable({
     console.log("indexes", b)
     return b
   },
-  queryPeriods: mobx.computed(function() {
+  get queryPeriods() {
     // mobx.whyRun()
     console.log("queryPeriods")
     return [this.dayPeriods[this.queryIndexes[0]][0], this.dayPeriods[this.queryIndexes[1]][1]]
-
-  }, "queryPeriods", {equals: (a,b)=>{return a[0] == b[0]}}),
+  },
   get badIndexes() { //from 0 index, inclusive
     var map = s.queryIndexes
       if(map[0] != 0){
@@ -295,35 +294,7 @@ var Store = observable({
         var zx = {}, a
         if (i == 0) {
           // a = arrangeUsers(0, nonEmpty[f], x.times, ar)
-          a = arrangeUserss(0, nonEmpty[f], x.times, ar)
-          function arrangeUserss(uI, i, x, arr) {
-            // if (x[i][0] <= arr[uI][0] && x[i][1] >= arr[uI][1]){
-            //
-            // }
-            for (uI; uI < arr.length; uI++) {
-              console.log(i, x[i][0] >= arr[uI][0] && x[i][1] <= arr[uI][1], new Date(x[i][0]).toString(), arr[uI][0].toString(), new Date(x[i][1]).toString(), arr[uI][1].toString())
-              if (x[i][0] >= arr[uI][0] && x[i][1] <= arr[uI][1]) {
-                if (x[i][0] == arr[uI][0] && x[i][1] == arr[uI][1]) {
-                  return {
-                    uI: uI,
-                    res: "full"
-                  }
-                } else {
-                  return {
-                    uI: uI,
-                    res: "some"
-                  }
-                }
-              }
-            }
-            return 8
-            // return {
-            //   ind: arr.length,
-            //   res: "none",
-            //   uI: uI,
-            //   i: i
-            // }
-          }
+          a = arrangeUsers(0, nonEmpty[f], x.times, ar)
           res = a.res
           uI = a.uI
         }
@@ -400,6 +371,7 @@ function initTimes(data){
         ind = arrangeTimes(0, tI, res, ar)
       }
       if (ind == i){
+        console.log(i, res)
         zx= res[tI]
         tI += 1
         ind = arrangeTimes(ind+1, tI, res, ar)
@@ -426,6 +398,9 @@ mobx.autorun(()=>{
 //////////////////////////////////utilities
 //pairs some schema index to non-empty value; helps record empty values
 function arrangeTimes(uI, i, x, arr) {
+  if (i == x.length){
+    return arr.length
+  }
   for (uI; uI < arr.length; uI++) {
     if (x[i][0] >= arr[uI][0] && x[i][1] <= arr[uI][1]) {
       return uI
