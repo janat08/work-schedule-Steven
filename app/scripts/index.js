@@ -22,10 +22,10 @@ const root = {
       })
       s.initializeTimes = a
       s.initializeUsers =  [{
-        name: "",
+        name: "name",
         times: a
       },{
-        name: "",
+        name: "name",
         times: a
       },
       ]

@@ -33,8 +33,8 @@ a = {
       if(s.times[i][0] == ""){
         throw new Error("no work hours for the day")
       }
-      // time.splice(0,2, s.times[i][0].plus({}).ts, s.times[i][1].plus({}).ts) don't know why this was necessery as dates are immutable anyhow
-      time.splice(0,2, s.times[i][0].ts, s.times[i][1].ts)
+       time.splice(0,2, s.times[i][0].plus({}).ts, s.times[i][1].plus({}).ts) // don't know why this was necessery as dates are immutable anyhow
+      // time.splice(0,2, s.times[i][0].ts, s.times[i][1].ts)
     } else {
       time.splice(0,2,"", "")
     }
@@ -42,8 +42,21 @@ a = {
   }),
 pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like in computed times
   checkBadI(i) //is redundant as bad time picker won't render
-  console.log(val.toString(),i, edge)
-  s.times[i][edge] = val
+  s.times[i][edge]=val
+  s.users = s.users.map((x)=> {
+    if (edge){
+      if (x.times[i][edge] >= val){
+        x.times[i][edge] =val.ts
+      }
+    } else {
+      if (x.times[i][edge] <= val){
+        x.times[i][edge] =val.ts
+      }
+    }
+    return x
+  })
+
+
 }),
   toggleDisable: action((i)=>{
     checkBadI(i)
@@ -60,6 +73,7 @@ pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like
     } else {
       s.users[s.selectedUser].times[s.selectedDay][0]= x.start.ts
     }
+
   }),
   selectEnd: action((x)=>{ //for user
     checkBadI(x)

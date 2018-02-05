@@ -7,12 +7,14 @@ var au = autorun
 var Dur = luxon.Duration
 var Int = luxon.Interval
 var JS = mobx.toJS
-var data = [[1517421600000,1517507999999],[1517508000000,1517594399999],[1517594400000,1517680799999],[1517680800000,1517767199999]]
+var data = [[1517767200000,1517853599999],[1517853600000,1517939999999],[1517940000000,1518026399999],[1518026400000,1518112799999],[1518112800000,1518199199999],[1518199200000,1518285599999],[1518285600000,1518371999999]]
 // initedData = initTimes(data)
 var mobxArrayBoilerplate = [["",""],["",""],["",""],["",""],["",""],["",""],["",""],]
 
 //https://github.com/mobxjs/mobx-utils
 //fromPromise, initiate store with initial values
+
+//is fairly useless as far as optimization goes currently as it is not used in autorun to save data which is then actually used, while it's params are immutable and so never fetched from memory
 var mapFields = mobx.createTransformer(function(d) {
   var min = d[0], max = d[1]
   // if(min == ""){
@@ -39,10 +41,6 @@ var Store = observable({
   users:  [],
   //["", ""] is important to demonstrate empty array as this is what checks in actions measure against, and mobx engine will dissapoint without it/with nothing there
   times: mobxArrayBoilerplate
-  // initTimes.call(this, data)
-  // this.initializeTimes
-
-  // [[1517421600000,1517507999999],[1517508000000,1517594399999],[1517594400000,1517680799999],["", ""]]
   ,
 
   disabled: {
@@ -296,7 +294,36 @@ var Store = observable({
       x.weekDays = s.times.reduce((ac, y, i, ar) => {
         var zx = {}, a
         if (i == 0) {
-          a = arrangeUsers(0, nonEmpty[f], x.times, ar)
+          // a = arrangeUsers(0, nonEmpty[f], x.times, ar)
+          a = arrangeUserss(0, nonEmpty[f], x.times, ar)
+          function arrangeUserss(uI, i, x, arr) {
+            // if (x[i][0] <= arr[uI][0] && x[i][1] >= arr[uI][1]){
+            //
+            // }
+            for (uI; uI < arr.length; uI++) {
+              console.log(i, x[i][0] >= arr[uI][0] && x[i][1] <= arr[uI][1], new Date(x[i][0]).toString(), arr[uI][0].toString(), new Date(x[i][1]).toString(), arr[uI][1].toString())
+              if (x[i][0] >= arr[uI][0] && x[i][1] <= arr[uI][1]) {
+                if (x[i][0] == arr[uI][0] && x[i][1] == arr[uI][1]) {
+                  return {
+                    uI: uI,
+                    res: "full"
+                  }
+                } else {
+                  return {
+                    uI: uI,
+                    res: "some"
+                  }
+                }
+              }
+            }
+            return 8
+            // return {
+            //   ind: arr.length,
+            //   res: "none",
+            //   uI: uI,
+            //   i: i
+            // }
+          }
           res = a.res
           uI = a.uI
         }
@@ -386,11 +413,13 @@ function initTimes(data){
 }
 mobx.autorun(()=>{
   console.log("innited")
-  // s.initializeTimes = data
+  // s.initializeTimes = [[1517767200000,1517853599999],[1517853600000,1517939999999],[1517940000000,1518026399999],[1518026400000,1518112799999],[1518112800000,1518199199999],[1518199200000,1518285599999],[1518285600000,1518371999999]]
   // s.initializeUsers =  [{
   //   name: "",
-  //   times: data
-
+  //   times: [[1517767200000,1517853599999],[1517853600000,1517939999999],[1517940000000,1518026399999],[1518026400000,1518112799999],[1518112800000,1518199199999],[1518199200000,1518285599999],[1518285600000,1518371999999]]
+  // },{
+  //   name: "",
+  //   times: [[1517767200000,1517853599999],[1517853600000,1517939999999],[1517940000000,1518026399999],[1518026400000,1518112799999],[1518112800000,1518199199999],[1518199200000,1518285599999],[1518285600000,1518371999999]]
   // }]
 })
 
