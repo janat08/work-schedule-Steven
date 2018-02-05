@@ -16,7 +16,7 @@ class storeHours extends hyperElement{
         <th>times</th>
       </tr>
   ${
-  st.storeHoursDropDownValues.map((boilerplate, i)=>{ //intentional periods
+  st.dropdownBoilerplate.map((boilerplate, i)=>{ //intentional periods
     if (i <= st.badIndexes[1] && i >= st.badIndexes[0]) {
       return w()`<a></a>`
     }

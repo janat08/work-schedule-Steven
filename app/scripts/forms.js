@@ -12,6 +12,9 @@
 // } else if (st.badIndexes[1] == 6){
 //
 // }
+if (st.users.length == 0){
+  return h`<span>No users to schedule`
+}
     return h`
     <div class="dropdown">
     Selected Day:

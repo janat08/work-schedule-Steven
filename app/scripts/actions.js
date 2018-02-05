@@ -30,7 +30,11 @@ a = {
 
     var status = s.users[y].weekDays[i].status
     if (status != "full"){
-      time.splice(0,2, s.times[i][0].plus({}).ts, s.times[i][1].plus({}).ts)
+      if(s.times[i][0] == ""){
+        throw new Error("no work hours for the day")
+      }
+      // time.splice(0,2, s.times[i][0].plus({}).ts, s.times[i][1].plus({}).ts) don't know why this was necessery as dates are immutable anyhow
+      time.splice(0,2, s.times[i][0].ts, s.times[i][1].ts)
     } else {
       time.splice(0,2,"", "")
     }
@@ -52,17 +56,17 @@ pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like
   selectStart: action((x)=>{ //for user
     checkBadI(x)
     if (s.users[s.selectedUser].times[s.selectedDay][0] == ""){
-      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, x.ts, s.dailyTimes[s.dailyTimes.length-1].plus({}).ts)
+      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, x.start.ts, s.dailyTimes[s.dailyTimes.length-1].start.plus({}).ts)
     } else {
-      s.users[s.selectedUser].times[s.selectedDay][0]= x.ts
+      s.users[s.selectedUser].times[s.selectedDay][0]= x.start.ts
     }
   }),
   selectEnd: action((x)=>{ //for user
     checkBadI(x)
     if (s.users[s.selectedUser].times[s.selectedDay][1] == ""){
-      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, s.dailyTimes[0].plus({}).ts, x.ts)
+      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, s.dailyTimes[0].start.plus({}).ts, x.start.ts)
     } else {
-      s.users[s.selectedUser].times[s.selectedDay][1]= x.ts
+      s.users[s.selectedUser].times[s.selectedDay][1]= x.start.ts
     }  }),
 
   selectDay: action((x)=>{

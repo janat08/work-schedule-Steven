@@ -15,15 +15,16 @@ var mobxArrayBoilerplate = [["",""],["",""],["",""],["",""],["",""],["",""],["",
 //fromPromise, initiate store with initial values
 var mapFields = mobx.createTransformer(function(d) {
   var min = d[0], max = d[1]
-  if(min == ""){
-    return []
-  }
-  if(max == ""){
-    return []
-  }
+  // if(min == ""){
+  //   return []
+  // }
+  // if(max == ""){
+  //   return []
+  // }
   var interval = luxon.Interval.fromDateTimes(min, max),
     intervals = interval.splitBy(s.conf.sI),
     res = intervals.map(mapFormat)
+    // res.push(mapFormat({start: max}))
   return res
 })
 var mapFormat = mobx.createTransformer(function(d){
@@ -57,7 +58,17 @@ var Store = observable({
   config: {
     sliderInt: 30 //forms, too
   },
-  selectedUser: 0,
+  _selectedUser: 0,
+  get selectedUser(){
+    if (this.users.length == 0){
+      return null
+    } else {
+      return this._selectedUser
+    }
+  },
+  set selectedUser(param){
+    this._selectedUser = param
+  },
   get conf() {
     return {
       sI: Dur.fromObject({
@@ -66,10 +77,20 @@ var Store = observable({
     }
   },
   get dailyTimes(){ //shown as options in user times select forms
-    return this.dailyTimesBoilerplate[s.selectedDay]
+    return this.dailyTimesInit[s.selectedDay]
   },
-  get dailyTimesBoilerplate(){
-    return this.times.map((x)=>mapFields(x))
+  get dailyTimesInit(){
+    var self = this
+    return this.dropdownBoilerplate.map((x, i)=>{
+        var min = self.times[i][0], max = self.times[i][1]
+        return x.slice(min.hour*4+min.minute/15, max.hour*3+max.minute/15)
+      }
+    )
+  },
+  get dropdownBoilerplate(){
+    return this.dayPeriods.map((item,i)=>{
+      return mapFields(item)
+    })
   },
   get selectedStart() { //for User on day
     var st = s
@@ -252,11 +273,6 @@ var Store = observable({
   set initializeUsers(data){
     this.users = initUsers.call(this, data)
   },
-  get storeHoursDropDownValues(){
-    return this.times.map((item,i)=>{
-      return luxon.Interval.fromDateTimes(s.dayPeriods[i][0], s.dayPeriods[i][1]).splitBy(s.conf.sI).map(x=>{return {start: x.start, formatted: x.start.toLocaleString(DT.TIME_SIMPLE)}})
-    })
-  },
   //if you decide to prefetch, it may be appropriate to introduce intermediary step
   //that splices sort users, and the proceeds to map in another computation
   get mapUsers() {
@@ -278,19 +294,20 @@ var Store = observable({
       } else {
       var res, uI //userIndex
       x.weekDays = s.times.reduce((ac, y, i, ar) => {
-        var zx = {}
+        var zx = {}, a
         if (i == 0) {
-          var a = arrangeUsers(0, nonEmpty[f], x.times, ar)
+          a = arrangeUsers(0, nonEmpty[f], x.times, ar)
           res = a.res
           uI = a.uI
         }
         if (uI == i) {
           zx.status = res
-          var a = arrangeUsers(uI + 1, nonEmpty[++f], x.times, ar)
-          res = a.res
-          uI = a.uI
+          if (nonEmpty.length != f+1){
+            a = arrangeUsers(uI + 1, nonEmpty[++f], x.times, ar)
+            res = a.res
+            uI = a.uI
+          }
           // console.log(ind, i, res)
-
         } else {
           zx.status = "none"
         }

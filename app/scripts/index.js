@@ -13,8 +13,35 @@ reg = window.customElements.define
 const root = {
   data: {},
    render() {
+
+    function refreshTimes(){
+      var a = s.dayPeriods.filter(x=>s.curR.month == x[0].month).map(x=>{
+        return x.map(x=>{
+          return x.ts
+        })
+      })
+      s.initializeTimes = a
+      s.initializeUsers =  [{
+        name: "",
+        times: a
+      },{
+        name: "",
+        times: a
+      },
+      ]
+    }
+
+    function emptyUser(){
+      s.users.push({
+        name: "empty",
+        times: mobxArrayBoilerplate,
+      })
+    }
+
      return hyperHTML(document.getElementById('root'))`
       <div>
+      <button onclick=${refreshTimes}>test, adds user/times with relevant times</button>
+      <button onclick=${emptyUser}>empty user add</button>
         <calendar-tag></calendar-tag>
         <store-hours></store-hours>
         <forms-tag></forms-tag>
