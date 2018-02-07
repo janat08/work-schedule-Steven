@@ -1,6 +1,9 @@
+<!DOCTYPE html>                                                                                 
+<script> 
+ 
 class calendar extends hyperElement{
   setup(n){
-    var a = au(n(s))
+    var a = mobx.autorun(n(Store))
     return a
   }
   previous(){
@@ -9,11 +12,7 @@ class calendar extends hyperElement{
   next (){
   return a.next()
   }
-
-  // return autorun(()=>{return w()`
-
   render(h, st){
-// language=HTML
   return h`
 
         <div class="calendar container-fluid">
@@ -35,7 +34,7 @@ class calendar extends hyperElement{
     function switchWeek(){
       return a.switchWeek(i)
     }
-    return w(x)`<li role="presentation" onclick=${switchWeek} class=${i == st.currentWeek ? "active" : ""}>
+    return hyperHTML.wire(x)`<li role="presentation" onclick=${switchWeek} class=${i == st.currentWeek ? "active" : ""}>
         <a >${"WEEK " + (i + 1)}</a>
         </li>`
 
@@ -54,7 +53,7 @@ class calendar extends hyperElement{
                   function selectDay (){
                     return a.selectDay(i)
                   }
-                  return w(x, ":cBody")`
+                  return hyperHTML.wire(x, ":cBody")`
                     <th class=${`${i==st.selectedDay?"info": (i >= st.badIndexes[0] && i <= st.badIndexes[1])? "warning": ""}`} onclick=${selectDay}>
                     ${x.date}<br/>
                     ${x.day}
@@ -68,19 +67,19 @@ class calendar extends hyperElement{
                 function selectUser(){
                   return a.selectUser(y)
                 }
-                return w(u, "calendarUserRow")`
+                return hyperHTML.wire(u, "calendarUserRow")`
                 <tr>
 <td class=${`${y==st.selectedUser?"info":""}`} onclick=${selectUser}>
               ${u.name}
               </td>
             ${st.mapUsers[y].weekDays.map((x,i)=>{
   if(st.disabledDays[i]){
-    return w()`<td class="active"></td>`
+    return hyperHTML.wire()`<td class="active"></td>`
   }
   function toggleDay(){
     return a.toggleDay(y, i)
   }
-  return w(x, ":calendarTD")`
+  return hyperHTML.wire(x, ":calendarTD")`
     <td onclick=${toggleDay}> ${st.mapUsers[y].weekDays[i].status=="full"? ['<i class="fa fa-check fa-lg" style="color:green" aria-hidden="true"></i>'] :
     st.mapUsers[y].weekDays[i].status=="some"? ['<i class="fa fa-check fa-lg" style="color:orange" aria-hidden="true"></i>'] :""} </td>
             `
@@ -93,5 +92,11 @@ class calendar extends hyperElement{
           </table>
         </div>
       </div>`
-  // })
 }}
+
+if (document.registerElement){
+document.registerElement("calendar-tag", calendar)
+} else {
+window.customElements.define("calendar-tag", calendar)
+}
+</script>

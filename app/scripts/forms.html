@@ -1,6 +1,11 @@
-  class forms extends hyperElement{
+<!DOCTYPE html>                                                                                     
+<script> 
+ 
+ 
+
+ class forms extends hyperElement{
     setup(n){
-      var a = au(n(s))
+      var a = mobx.autorun(n(Store))
       // var b = mobx.reaction(setFields, makeFields, {delay: 100});
       return ()=>{a();return}
     }
@@ -29,7 +34,7 @@ if (st.users.length == 0){
         return a.selectDay(i)
       }
 
-      return w(x, ":dropdownDay")`
+      return hyperHTML.wire(x, ":dropdownDay")`
             <li onclick=${selectDay}><a>${x.fullDay}</a></li>
             `
     })}
@@ -48,7 +53,7 @@ if (st.users.length == 0){
         return a.selectUser(i)
       }
 
-      return w(x, ":dropdownUser")`
+      return hyperHTML.wire(x, ":dropdownUser")`
             <li onclick=${selectUser}><a>${x.name}</a></li>
             `
     })}
@@ -66,7 +71,7 @@ if (st.users.length == 0){
         function selectStart() {
           return a.selectStart(x)
         }
-      return w(x, ":userStart")`
+      return hyperHTML.wire(x, ":userStart")`
             <li onclick=${selectStart}><a>${x.formatted}</a></li>
             `
     })}
@@ -84,14 +89,21 @@ if (st.users.length == 0){
             function selectEnd(){
               return a.selectEnd(x)
             }
-            return w(x, ":userEnd")`
+            return hyperHTML.wire(x, ":userEnd")`
             <li onclick=${selectEnd}><a>${x.formatted}</a></li>
             `
     })}
         </ul>
       </div>
-      
 
   `
 }
   }
+
+  if (document.registerElement){
+document.registerElement("forms-tag", forms)
+} else {
+window.customElements.define("forms-tag", forms)
+}
+
+</script>

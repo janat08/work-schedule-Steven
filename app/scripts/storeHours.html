@@ -1,6 +1,9 @@
+<!DOCTYPE html>                                                                                      
+<script> 
+ 
 class storeHours extends hyperElement{
   setup(n){
-    var a = au(n(s))
+    var a = mobx.autorun(n(Store))
 
     return a
   }
@@ -18,7 +21,7 @@ class storeHours extends hyperElement{
   ${
   st.dropdownBoilerplate.map((boilerplate, i)=>{ //intentional periods
     if (i <= st.badIndexes[1] && i >= st.badIndexes[0]) {
-      return w()`<a></a>`
+      return hyperHTML.wire()`<a></a>`
     }
     function disable(){
       return a.toggleDisable(i)
@@ -34,7 +37,7 @@ class storeHours extends hyperElement{
         //   var cut = boilerplate.findIndex((x)=>x==st.initializedTimes[i][0])
         //   var spliced = boilerplate.slice().splice(0, cut)
         // }
-        return w()`
+        return hyperHTML.wire()`
       <div class="dropdown">
         <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             ${edge?"End":"Start"}
@@ -45,7 +48,7 @@ class storeHours extends hyperElement{
                   function pick() {
                     return a.pick(y.start, i, edge)
                   }
-                  return w(y, ":selectHours"+i+edge)`
+                  return hyperHTML.wire(y, ":selectHours"+i+edge)`
                   <li onclick=${pick}><a>${y.formatted}</a></li>
                   `
               })
@@ -55,7 +58,7 @@ class storeHours extends hyperElement{
               `
       }
 
-    return w(boilerplate, ":storeItem")`
+    return hyperHTML.wire(boilerplate, ":storeItem")`
           <tr>
       <td onclick=${selectDay} class=${`${i == st.selectedDay? "info" : ""}`}>
 ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}</td>
@@ -75,6 +78,12 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 
 `
 }}
+
+if (document.registerElement){
+document.registerElement("store-hours", storeHours)
+} else {
+window.customElements.define("store-hours", storeHours)
+}
 
 //for opening another hour picker for next days, requires support integration in
 // this.attrs.over24Hours = false
@@ -105,7 +114,7 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 
 //   var boilerplate = Array(24).fill(0,0,24).map((x,i)=>{if (i==0){return 12} else if (i>12){return i-12} else {return i}})
 //   function minutes(edge){
-//     return w()`
+//     return hyperHTML.wire()`
 //     <div style=${{width: 200}}>
 //     ${[0, 15, 30, 45].map((x, i) => {
 //         function pick() {
@@ -127,7 +136,7 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 //         }
 
 
-//         return w()`
+//         return hyperHTML.wire()`
 //    <span style=${style}  class="time-selection__cell" onclick=${pick}>${x}</span>
 //     `
 //       })
@@ -136,7 +145,7 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 
 //   function hours(edge, toggle){
 //     toggle = toggle? {days: 1}: undefined
-//     return w()`
+//     return hyperHTML.wire()`
 //     <div style=${{width: 200}}>
 //     ${boilerplate.map((x, i) => {
 //       function pick() {
@@ -155,9 +164,11 @@ ${st.calendarWeek[i].fullDay}<br/> ${st.storeHours[i][0]}-${st.storeHours[i][1]}
 //         br = ['<br/>']
 //       }
 
-//       return w()`
+//       return hyperHTML.wire()`
 //   <span onclick=${pick}  class="time-selection__cell" style=${style}>${x}</span> ${br}
 //   `
 //     })
 //   }`
 //   }
+
+</script>

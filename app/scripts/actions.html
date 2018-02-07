@@ -1,3 +1,5 @@
+<!DOCTYPE html>                                                                                     
+<script> 
 var extendObservable = mobx.extendObservable
 var action = mobx.action
 a = {
@@ -9,15 +11,15 @@ a = {
     var val = s.weekPeriods[i]
     s.curR =  val[0].month == ref.month? val[0]: val[1]
   }),
-  next: action((i)=>{
+  next: action((i)=>{ //month
     var ref = s.curR
-    s.curR = DT.fromObject({year: ref.year, month: ref.month}).plus({month:1})
+    s.curR = luxon.DateTime.fromObject({year: ref.year, month: ref.month}).plus({month:1})
   }),
-  previous: action((i)=>{
+  previous: action((i)=>{ //month
     var ref = s.curR
-    s.curR = DT.fromObject({year: ref.year, month: ref.month}).minus({days:1})
+    s.curR = luxon.DateTime.fromObject({year: ref.year, month: ref.month}).minus({days:1})
   }),
-  toggleDay: action((y, i)=>{
+  toggleDay: action((y, i)=>{ //calendar checkmark logic
     if (s.disabledDays[i]){
       return
     }
@@ -40,7 +42,7 @@ a = {
     }
     console.log(time)
   }),
-pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like in computed times
+pick: action((val, i, edge)=>{ //pick times for storeHours
   checkBadI(i) //is redundant as bad time picker won't render
   s.times[i][edge]=val
   s.users = s.users.map((x)=> {
@@ -60,11 +62,7 @@ pick: action((val, i, edge)=>{ //TODO make autorun that fills gaps in times like
 }),
   toggleDisable: action((i)=>{
     checkBadI(i)
-    // if(s.times[i].disabled == undefined){
-    // extendObservable(s.times[i].disabled, {disabled: true})
-    // }
      extendObservable(s.disabled, {[i]: !s.disabled[i]})
-    // s.times[i].disabled = !s.times[i].disabled
   }),
   selectStart: action((x)=>{ //for user
     checkBadI(x)
@@ -95,3 +93,5 @@ function checkBadI(x){
     throw new Error("This act falls outside selected month, switch it")
   }
 }
+
+</script>
