@@ -4,39 +4,39 @@ var extendObservable = mobx.extendObservable
 var action = mobx.action
 a = {
   selectUser: action((i)=>{
-    s.selectedUser = i
+    Store.selectedUser = i
   }),
   switchWeek: action((i)=>{
-    var ref = s.curR
-    var val = s.weekPeriods[i]
-    s.curR =  val[0].month == ref.month? val[0]: val[1]
+    var ref = Store.curR
+    var val = Store.weekPeriods[i]
+    Store.curR =  val[0].month == ref.month? val[0]: val[1]
   }),
   next: action((i)=>{ //month
-    var ref = s.curR
-    s.curR = luxon.DateTime.fromObject({year: ref.year, month: ref.month}).plus({month:1})
+    var ref = Store.curR
+    Store.curR = luxon.DateTime.fromObject({year: ref.year, month: ref.month}).plus({month:1})
   }),
   previous: action((i)=>{ //month
-    var ref = s.curR
-    s.curR = luxon.DateTime.fromObject({year: ref.year, month: ref.month}).minus({days:1})
+    var ref = Store.curR
+    Store.curR = luxon.DateTime.fromObject({year: ref.year, month: ref.month}).minus({days:1})
   }),
   toggleDay: action((y, i)=>{ //calendar checkmark logic
-    if (s.disabledDays[i]){
+    if (Store.disabledDays[i]){
       return
     }
     checkBadI(i)
     console.log(time, y, i)
 
-    // var ind = s.badIndexes[0]==0? i-
-    var time = s.users[y].times[i]
+    // var ind = Store.badIndexes[0]==0? i-
+    var time = Store.users[y].times[i]
     console.log(time, y, i)
 
-    var status = s.users[y].weekDays[i].status
+    var status = Store.users[y].weekDays[i].status
     if (status != "full"){
-      if(s.times[i][0] == ""){
+      if(Store.times[i][0] == ""){
         throw new Error("no work hours for the day")
       }
-       time.splice(0,2, s.times[i][0].plus({}).ts, s.times[i][1].plus({}).ts) // don't know why this was necessery as dates are immutable anyhow
-      // time.splice(0,2, s.times[i][0].ts, s.times[i][1].ts)
+       time.splice(0,2, Store.times[i][0].plus({}).ts, Store.times[i][1].plus({}).ts) // don't know why this was necessery as dates are immutable anyhow
+      // time.splice(0,2, Store.times[i][0].ts, Store.times[i][1].ts)
     } else {
       time.splice(0,2,"", "")
     }
@@ -44,8 +44,8 @@ a = {
   }),
 pick: action((val, i, edge)=>{ //pick times for storeHours
   checkBadI(i) //is redundant as bad time picker won't render
-  s.times[i][edge]=val
-  s.users = s.users.map((x)=> {
+  Store.times[i][edge]=val
+  Store.users = Store.users.map((x)=> {
     if (edge){
       if (x.times[i][edge] >= val){
         x.times[i][edge] =val.ts
@@ -62,34 +62,34 @@ pick: action((val, i, edge)=>{ //pick times for storeHours
 }),
   toggleDisable: action((i)=>{
     checkBadI(i)
-     extendObservable(s.disabled, {[i]: !s.disabled[i]})
+     extendObservable(Store.disabled, {[i]: !Store.disabled[i]})
   }),
   selectStart: action((x)=>{ //for user
     checkBadI(x)
-    if (s.users[s.selectedUser].times[s.selectedDay][0] == ""){
-      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, x.start.ts, s.dailyTimes[s.dailyTimes.length-1].start.plus({}).ts)
+    if (Store.users[Store.selectedUser].times[Store.selectedDay][0] == ""){
+      Store.users[Store.selectedUser].times[Store.selectedDay].splice(0, 2, x.start.ts, Store.dailyTimes[Store.dailyTimes.length-1].start.plus({}).ts)
     } else {
-      s.users[s.selectedUser].times[s.selectedDay][0]= x.start.ts
+      Store.users[Store.selectedUser].times[Store.selectedDay][0]= x.start.ts
     }
 
   }),
   selectEnd: action((x)=>{ //for user
     checkBadI(x)
-    if (s.users[s.selectedUser].times[s.selectedDay][1] == ""){
-      s.users[s.selectedUser].times[s.selectedDay].splice(0, 2, s.dailyTimes[0].start.plus({}).ts, x.start.ts)
+    if (Store.users[Store.selectedUser].times[Store.selectedDay][1] == ""){
+      Store.users[Store.selectedUser].times[Store.selectedDay].splice(0, 2, Store.dailyTimes[0].start.plus({}).ts, x.start.ts)
     } else {
-      s.users[s.selectedUser].times[s.selectedDay][1]= x.start.ts
+      Store.users[Store.selectedUser].times[Store.selectedDay][1]= x.start.ts
     }  }),
 
   selectDay: action((x)=>{
     checkBadI(x)
-    s.selectedDay = x
+    Store.selectedDay = x
   })
 
 }
 
 function checkBadI(x){
-  if (x>= s.badIndexes[0] && x <= s.badIndexes[1]){
+  if (x>= Store.badIndexes[0] && x <= Store.badIndexes[1]){
     throw new Error("This act falls outside selected month, switch it")
   }
 }
