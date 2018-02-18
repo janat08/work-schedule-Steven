@@ -1,4 +1,7 @@
-<!DOCTYPE html>                                                                                     
+<!DOCTYPE html>    
+<script src="https://unpkg.com/mobx@3.4.1/lib/mobx.umd.min.js"></script>   
+<script src="luxon.min.js"></script>
+                                                                              
 <script> 
 var MobxArrayBoilerplate = [["",""],["",""],["",""],["",""],["",""],["",""],["",""],]
 //is fairly useless as far as optimization goes currently as it is not used in autorun to save data which is then actually used, while it's params are immutable and so never fetched from memory
@@ -6,7 +9,6 @@ var MobxArrayBoilerplate = [["",""],["",""],["",""],["",""],["",""],["",""],["",
 //alternatively just generating strings in current locale (some use 24 hour format) might work if accounting for daylight savings and stuff when mapping actual dates to strings
 var MapFields = mobx.createTransformer(function(d) {
   var min = d[0], max = d[1]
-
   var interval = luxon.Interval.fromDateTimes(min, max),
     intervals = interval.splitBy(Store.conf.sI),
     res = intervals.map(MapFormat)
@@ -37,6 +39,15 @@ var Store = mobx.observable({
     5: false,
     6: false
   },
+  dropDownBoilerplate: [],
+  // dropdownBoilerplate: Store.dayPeriods.map((item,i)=>{
+  //     return MapFields(item)
+  //   }),
+  // // get dropdownBoilerplate(){
+  // //   return Store.dayPeriods.map((item,i)=>{
+  // //     return MapFields(item)
+  // //   })
+  // // },
   config: {
     sliderInt: 30 //forms, too, slider intervals, access from conf
   },
@@ -68,11 +79,6 @@ var Store = mobx.observable({
         return x.slice(min.hour*4+min.minute/15, max.hour*3+max.minute/15)
       }
     )
-  },
-  get dropdownBoilerplate(){ //minute increments in a day
-    return this.dayPeriods.map((item,i)=>{
-      return MapFields(item)
-    })
   },
   get selectedStart() { //for User on day
     var st = Store
@@ -106,7 +112,6 @@ var Store = mobx.observable({
     } else if (this.dayPeriods[6][0].month != this.performanceWeekSpan.month){
       b = [0, -1+this.dayPeriods.findIndex(x=>x[0].month != this.performanceWeekSpan.month),]
     }
-    console.log("indexes", b)
     return b
   },
   get queryPeriods() { //[start, end] of current week
@@ -358,8 +363,9 @@ function initTimes(data){
   return res
 }
 
-mobx.autorun(()=>{ //look here
- var a =  Store.queryPeriods[0]
+mobx.reaction(function(){
+  return Store.queryPeriods[0]
+}, function(){
   var a = Store.dayPeriods.filter(x=>Store.curR.month == x[0].month).map(x=>{
     return x.map(x=>{
       return x.ts
@@ -374,7 +380,53 @@ mobx.autorun(()=>{ //look here
     times: a
   },
   ]
-})
+} , {fireImmediately: true, delay: 50});
+
+//   var MapFields = mobx.createTransformer(function(d) {
+//   var min = d[0], max = d[1]
+
+//   var interval = luxon.Interval.fromDateTimes(min, max),
+//     intervals = interval.splitBy(Store.conf.sI),
+//     res = intervals.map(MapFormat)
+//     // res.push(MapFormat({start: max}))
+//   return res
+// })
+
+// var MapFormat = mobx.createTransformer(function(d){
+// d.formatted = d.start.toLocaleString(luxon.DateTime.TIME_SIMPLE)
+//   return d
+// })
+
+
+mobx.reaction(function(){
+  return Store.dayPeriods[0]
+}, function(data){
+  var a =  Store.dayPeriods.map((item,i)=>{
+      return MapFields(item)
+    })
+    mobx.extendObservable(Store, {dropdownBoilerplate: a})
+} , {fireImmediately: true, delay: 200});
+
+
+
+
+// mobx.autorun(()=>{ //look here
+//  var a =  Store.queryPeriods[0]
+//   var a = Store.dayPeriods.filter(x=>Store.curR.month == x[0].month).map(x=>{
+//     return x.map(x=>{
+//       return x.ts
+//     })
+//   })
+//   Store.initializeTimes = a
+//   Store.initializeUsers =  [{
+//     name: "name",
+//     times: a
+//   },{
+//     name: "name",
+//     times: a
+//   },
+//   ]
+// })
 
 //////////////////////////////////utilities
 //pairs some schema index to non-empty value; helps record empty values, linear instead of quadratic
