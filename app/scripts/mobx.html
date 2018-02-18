@@ -380,7 +380,7 @@ mobx.reaction(function(){
     times: a
   },
   ]
-} , {fireImmediately: true, delay: 50});
+} , {fireImmediately: true});
 
 //   var MapFields = mobx.createTransformer(function(d) {
 //   var min = d[0], max = d[1]
@@ -405,7 +405,7 @@ mobx.reaction(function(){
       return MapFields(item)
     })
     mobx.extendObservable(Store, {dropdownBoilerplate: a})
-} , {fireImmediately: true, delay: 200});
+} , {fireImmediately: true, delay: 20});
 
 
 
